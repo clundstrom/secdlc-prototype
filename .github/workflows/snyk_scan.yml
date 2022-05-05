@@ -1,0 +1,14 @@
+name: Snyk docker scan
+on: pull_request
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Build a Docker image
+      run: docker build ./database -t authio-db:dev
+    - name: Scan DB image for vulnerabilities
+      uses: snyk/actions/docker@master
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      with:
+        image: authio-db:dev
