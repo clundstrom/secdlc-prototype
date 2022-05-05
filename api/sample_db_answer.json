@@ -1,0 +1,27 @@
+{
+    "1": {
+        "name": "test_1",
+        "quantity": 3,
+        "type": "Fruit"
+    },
+    "2": {
+        "name": "test_2",
+        "quantity": 3,
+        "type": "Fruit"
+    },
+    "3": {
+        "name": "test_3",
+        "quantity": 3,
+        "type": "Meat"
+    },
+    "4": {
+        "name": "test_4",
+        "quantity": 3,
+        "type": "Meat"
+    },
+    "5": {
+        "name": "test_5",
+        "quantity": 3,
+        "type": "General"
+    }
+}
