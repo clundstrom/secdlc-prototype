@@ -4,12 +4,18 @@ jobs:
   security:
     runs-on: ubuntu-latest
     steps:
+      # Build image
+    - uses: actions/checkout@v2
     - name: Build a Docker image
-      run: docker build database/ -t authio-db:dev
+      run: docker build -t authio-db:dev database
+
+      ## Scan Image
     - name: Scan DB image for vulnerabilities
       uses: snyk/actions/docker@master
+      continue-on-error: true
       env:
         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
       with:
         image: authio-db:dev
-        args: --file=Dockerfile
+        args: --file=./database/Dockerfile
+        
