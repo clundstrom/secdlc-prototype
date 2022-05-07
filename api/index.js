@@ -1,23 +1,19 @@
 'use strict';
 
 const express = require('express');
+const lib = require('./lib')
 const app = new express();
 
-function verifyToken(req, res) {
-    const bearerHeader = req.headers['authorization'];
-  
-    if (bearerHeader) {
-      const bearer = bearerHeader.split(' ');
-      const bearerToken = bearer[1];
-      //req.token = bearerToken;
-      console.log(bearerToken)
-    } else {
-      // Forbidden
-      res.sendStatus(403);
-    }
-}
+
+let port =  process.env.PORT | 2022
+let host = process.env.HOST | "127.0.0.1"
+
 
 app.use(express.json())
+
+app.get('/', (req, res) => {
+    res.send('Nothing to see here' + lib.validateToken("aa"))
+});
 
 app.get('/test', (req, res) => {
     res.cookie("test", "value")
@@ -57,6 +53,6 @@ app.post('/updateitem', (req, res) => {
     res.send('You have updated an item');
 });
 
-app.listen(2022, () => {
+app.listen(port, host, () => {
     console.log('Server started');
 });
