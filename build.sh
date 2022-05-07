@@ -14,6 +14,20 @@ db(){
     fi
 }
 
+api(){
+    docker rm -f api &> /dev/null || echo "No container found. Nothing removed."
+
+    echo "Building api "
+    docker build ./api -t inventory-api:dev
+
+    if [[ $1 == '-r' ]]; then
+      echo "Starting api in detached mode.."
+      docker run --name api -d -t -p "2022:2022" \
+        --env-file ./api/.env \
+        inventory-api:dev
+    fi
+}
+
 if [[ $# -eq 0 ]]; then
     db
     exit 0
@@ -29,6 +43,13 @@ for i in "$@"; do
     ;;
     "db")
       db $run
+      ;;
+    "api")
+      api $run
+      ;;
+    "all")
+      db $run
+      api $run
       ;;
     *)
       echo "Usage: $0 [OPTIONAL] {db|{empty}}"
