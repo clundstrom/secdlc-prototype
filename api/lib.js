@@ -1,4 +1,5 @@
 const Ajv = require("ajv")
+const jwt = require('jsonwebtoken')
 
 function getToken(req) {
   const bearerHeader = req.headers['authorization'];
@@ -7,8 +8,9 @@ function getToken(req) {
   return bearerToken;
 }
 
-function validateToken(token) {
-  return "Okay"
+function generateToken(payload){
+  var priv = Buffer.from(process.env.PRIV, 'base64').toString('ascii')
+  return jwt.sign(payload, priv, { algorithm: 'RS256'})
 }
 
 function verifySchema(payload, schema, callback) {
@@ -18,6 +20,6 @@ function verifySchema(payload, schema, callback) {
   callback(valid, validate.errors)
 }
 
-module.exports.validateToken = validateToken
+module.exports.generateToken = generateToken
 module.exports.getToken = getToken
 module.exports.verifySchema = verifySchema

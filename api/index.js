@@ -26,16 +26,30 @@ app.post('/login', (req, res) => {
         if(result){
             
             pool.getConnection()
-                .then(conn => {
-                
-                conn.query("SELECT hash FROM users WHERE name='root'")
+                .then(conn => {      
+                conn.query(`SELECT hash, access FROM users WHERE name='${password}'`)
                     .then((rows) => {
-                        console.log(rows);
+                        if(rows.length !== 1){
+                            res.status(401).send("Invalid credentials")
+                            conn.end();
+                            return
+                        }
+                        let hash = rows[0].hash
+                        let access = rows[0].access
+                        bcrypt.compare(password, hash, (error, result) => {
+                            if(result){
+                                let token = lib.generateToken({user:username, access:access})
+                                console.log("Generated token: ", token)
+                                res.status(200).cookie("webToken", token).send("Login successful")
+                            } else {
+                                res.status(401).send("Invalid credentials")
+                            }
+                        })
                         conn.end();
                     })    
                 }).catch(err => {
                     //not connected
-                    console.log(err)
+                    res.status(401).send(err)
                 });
         } else {
             console.log(new Date(), ": ", JSON.stringify(errors));
