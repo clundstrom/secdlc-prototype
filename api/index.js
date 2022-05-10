@@ -2,12 +2,17 @@
 
 const express = require('express');
 const lib = require('./lib')
+const bcrypt = require('bcrypt')
+const mariadb = require('mariadb')
 const app = new express();
 const SCHEMAS = require('./schemas')
-
-let port =  process.env.PORT | 2022
-let host = process.env.HOST | "127.0.0.1"
-
+const port =  process.env.PORT || 2022
+const host = process.env.HOST || "127.0.0.1"
+const DB_USER = process.env.DB_USER || "authio_service_account"
+const DB_HOST = process.env.DB_HOST || "127.0.0.1"
+const DB_PASS = process.env.DB_PASS || "<your_mysql_password>"
+console.log(DB_USER, DB_HOST, DB_PASS)
+const pool = mariadb.createPool({host: DB_HOST, user: DB_USER, password: DB_PASS, database: "authio", connectionLimit: 5});
 
 app.use(express.json())
 
@@ -16,13 +21,22 @@ app.get('/', (req, res) => {
 });
 
 app.post('/login', (req, res) => {
+    const {username, password} = req.body
     lib.verifySchema(req.body, SCHEMAS.loginSchema, (result, errors) => {
         if(result){
-            if(req.body.username === process.env.ADMIN_USER && req.body.password === process.env.ADMIN_PASS){
-                res.status(200).cookie("webToken", process.env.ROOT).send("Login successful!")
-            } else {
-                res.status(401).send('Invalid credentials')
-            }
+            
+            pool.getConnection()
+                .then(conn => {
+                
+                conn.query("SELECT hash FROM users WHERE name='root'")
+                    .then((rows) => {
+                        console.log(rows);
+                        conn.end();
+                    })    
+                }).catch(err => {
+                    //not connected
+                    console.log(err)
+                });
         } else {
             console.log(new Date(), ": ", JSON.stringify(errors));
             res.status(400).send("Invalid post parameters");
