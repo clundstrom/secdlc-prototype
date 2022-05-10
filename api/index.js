@@ -22,12 +22,13 @@ app.get('/', (req, res) => {
 
 app.post('/login', (req, res) => {
     const {username, password} = req.body
+    const hash = 
     lib.verifySchema(req.body, SCHEMAS.loginSchema, (result, errors) => {
         if(result){
             
             pool.getConnection()
-                .then(conn => {      
-                conn.query(`SELECT hash, access FROM users WHERE name='${password}'`)
+                .then(conn => {
+                    conn.query(`SELECT hash, access FROM users WHERE name = ?`, [username])
                     .then((rows) => {
                         if(rows.length !== 1){
                             res.status(401).send("Invalid credentials")
