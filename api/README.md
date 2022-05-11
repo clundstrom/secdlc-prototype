@@ -67,3 +67,12 @@ HTTP response 200 + text body
 | Cleaning  | 3            |
 | Snacks    | 4            |
 | Office    | 5            |
+
+### Logins
+| User     | Password |
+| -------- | -------- |
+| root     | root     |
+| fruit    | fruit    |
+| meat     | meat     |
+| food     | food     |
+| supplies | supplies |
