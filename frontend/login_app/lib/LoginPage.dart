@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:login_app/homePage.dart';
 import 'package:login_app/signUpPage.dart';
 import 'package:login_app/testPage.dart';
+import 'package:http/http.dart' as http;
 
 class LoginPage extends StatefulWidget {
   const LoginPage();
@@ -44,8 +45,15 @@ class SignInScreen extends StatelessWidget {
 class _SignInFormState extends State<LoginPage> {
   final usernameTextController = TextEditingController();
   final passwordTextController = TextEditingController();
-  String currentText = "";
+  String currentTextUsername = "";
   String currentTextPW = "";
+
+  void postData() async {
+    http.post(Uri.parse('http://localhost:2022/login'), //något liknande här
+        body: {"username": currentTextUsername, "password": currentTextPW});
+  }
+
+  // http://localhost:2022/api/getInventory
 
   @override
   Widget build(BuildContext context) {
@@ -81,9 +89,9 @@ class _SignInFormState extends State<LoginPage> {
               ),
               validator: (value) =>
                   value!.isEmpty ? 'Email can\'t be empty' : null,
-              onSaved: (value) => currentText = value!.trim(),
+              onSaved: (value) => currentTextUsername = value!.trim(),
               onChanged: (val) {
-                setState(() => currentText = val);
+                setState(() => currentTextUsername = val);
               },
             ),
           ),

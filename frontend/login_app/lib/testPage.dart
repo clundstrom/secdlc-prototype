@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'jsonData.dart';
 import 'dart:async';
 import 'dart:convert';
@@ -17,6 +18,10 @@ class TestPage extends StatefulWidget {
 class _TestPageState extends State<TestPage> {
   late Future<List<Data>> futureData;
   String now = DateFormat("yyyy-MM-dd").format(DateTime.now());
+  String name = "banan";
+  int quantity = 1;
+  int type = 1;
+
   @override
   void initState() {
     super.initState();
@@ -25,6 +30,7 @@ class _TestPageState extends State<TestPage> {
 
   Future<List<Data>> fetchData() async {
     final response = await http
+        //.get(Uri.parse('https://jsonplaceholder.typicode.com/albums'));
         .get(Uri.parse('https://jsonplaceholder.typicode.com/albums'));
     if (response.statusCode == 200) {
       List jsonResponse = json.decode(response.body);
@@ -32,6 +38,11 @@ class _TestPageState extends State<TestPage> {
     } else {
       throw Exception('Unexpected error occured!');
     }
+  }
+
+  void addItem() async {
+    http.post(Uri.parse('http://localhost:2022/addItem'), //något liknande här
+        body: {"name": name, "quantity": quantity, "type": type});
   }
 
   @override
@@ -44,6 +55,7 @@ class _TestPageState extends State<TestPage> {
         height: size.height,
         width: size.width,
         child: Row(mainAxisAlignment: MainAxisAlignment.start, children: [
+          //username + log out column
           Padding(
             padding: EdgeInsets.only(bottom: 40, top: 40),
             child: SizedBox(
@@ -110,6 +122,7 @@ class _TestPageState extends State<TestPage> {
               ),
             ),
           ),
+          //Vit box
           Padding(
             padding: EdgeInsets.only(top: 10, bottom: 10),
             child: SizedBox(
@@ -120,6 +133,7 @@ class _TestPageState extends State<TestPage> {
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(24.0)),
                 child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -169,8 +183,8 @@ class _TestPageState extends State<TestPage> {
                               border: Border.all(color: Colors.black),
                               color: Colors.black,
                             ),
-                            height: size.height * 0.4,
-                            width: 500,
+                            height: size.height * 0.6,
+                            width: size.width * 0.4,
                             child: FutureBuilder<List<Data>>(
                                 future: futureData,
                                 builder: (context, snapshot) {
@@ -219,7 +233,115 @@ class _TestPageState extends State<TestPage> {
                               ),
                             ),
                           )
-                        ])
+                        ]),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.grey.withOpacity(0.35),
+                      ),
+                      width: size.width * 0.25,
+                      height: size.height,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Padding(
+                            padding: EdgeInsets.only(top: 40.0, left: 25),
+                            child: Text(
+                              'Inventory Overlook',
+                              style: TextStyle(
+                                fontSize: 28,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          const Padding(
+                            padding: EdgeInsets.only(left: 25, top: 40),
+                            child: Text("Fruit: " "amount"),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 15.0),
+                            child: LinearPercentIndicator(
+                              width: size.width * 0.20,
+                              animation: true,
+                              lineHeight: 10.0,
+                              animationDuration: 2000,
+                              percent: 0.9,
+                              //center: const Text("90.0%"),
+                              barRadius: const Radius.circular(16),
+                              progressColor: Colors.green,
+                            ),
+                          ),
+                          const Padding(
+                            padding: EdgeInsets.only(left: 25, top: 40),
+                            child: Text("Meat: " "amount"),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 15.0),
+                            child: LinearPercentIndicator(
+                              width: size.width * 0.20,
+                              animation: true,
+                              lineHeight: 10.0,
+                              animationDuration: 2500,
+                              percent: 0.1,
+                              //center: const Text("80.0%"),
+                              barRadius: const Radius.circular(16),
+                              progressColor: Colors.green,
+                            ),
+                          ),
+                          const Padding(
+                            padding: EdgeInsets.only(left: 25, top: 40),
+                            child: Text("Cleaning: " "amount"),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 15.0),
+                            child: LinearPercentIndicator(
+                              width: size.width * 0.20,
+                              animation: true,
+                              lineHeight: 10.0,
+                              animationDuration: 2500,
+                              percent: 0.7,
+                              //center: const Text("80.0%"),
+                              barRadius: const Radius.circular(16),
+                              progressColor: Colors.green,
+                            ),
+                          ),
+                          const Padding(
+                            padding: EdgeInsets.only(left: 25, top: 40),
+                            child: Text("Snacks: " "amount"),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 15.0),
+                            child: LinearPercentIndicator(
+                              width: size.width * 0.20,
+                              animation: true,
+                              lineHeight: 10.0,
+                              animationDuration: 2500,
+                              percent: 0.3,
+                              //center: const Text("80.0%"),
+                              barRadius: const Radius.circular(16),
+                              progressColor: Colors.green,
+                            ),
+                          ),
+                          const Padding(
+                            padding: EdgeInsets.only(left: 25, top: 40),
+                            child: Text("Office: " "amount"),
+                          ),
+                          Padding(
+                            padding:
+                                const EdgeInsets.only(left: 15.0, bottom: 150),
+                            child: LinearPercentIndicator(
+                              width: size.width * 0.20,
+                              animation: true,
+                              lineHeight: 10.0,
+                              animationDuration: 2500,
+                              percent: 0.5,
+                              //center: const Text("80.0%"),
+                              barRadius: const Radius.circular(16),
+                              progressColor: Colors.green,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -238,6 +360,18 @@ class ListItem extends StatelessWidget {
   final String type;
 
   ListItem(this.quantity, this.name, this.type);
+
+  void removeItem() async {
+    http.post(
+        Uri.parse('http://localhost:2022/removeItem'), //något liknande här
+        body: {"name": name});
+  }
+
+  void updateItem() async {
+    http.post(
+        Uri.parse('http://localhost:2022/updateItem'), //något liknande här
+        body: {"name": name});
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -273,9 +407,6 @@ class ListItem extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(
-                width: 16.0,
-              ),
               Container(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -284,16 +415,16 @@ class ListItem extends StatelessWidget {
                       height: 8.0,
                     ),
                     Text(
-                      name,
+                      " " + name,
                       style: const TextStyle(
                           fontSize: 22.0, fontWeight: FontWeight.w600),
                     ),
                     SizedBox(
-                        width: 200.0,
+                        //width: 200.0,
                         child: Text(
-                          type,
-                          style: TextStyle(fontSize: 17.0, color: Colors.grey),
-                        )),
+                      " " + type,
+                      style: TextStyle(fontSize: 17.0, color: Colors.grey),
+                    )),
                   ],
                 ),
               ),
