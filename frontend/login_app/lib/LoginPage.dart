@@ -50,7 +50,8 @@ class _SignInFormState extends State<LoginPage> {
 
   void postData() async {
     http.post(Uri.parse('http://localhost:2022/login'), //något liknande här
-        body: {"username": currentTextUsername, "password": currentTextPW});
+        body: {"username": currentTextUsername, "password": currentTextPW},
+        headers: {"Accept": "application/json"});
   }
 
   // http://localhost:2022/api/getInventory
