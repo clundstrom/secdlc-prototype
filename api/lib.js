@@ -19,7 +19,7 @@ function verifyToken(payload){
     var body = jwt.verify(payload, pub, { algorithm: 'RS256'})
   } catch(err){
     console.log(new Date(), ": ", err.name, err.message)
-    return {"err":true, "result":{...err.name,...err.message}}
+    return {"err":true, "result": err.name + " " + err.message}
   }
   return {"err":false, "result":body}
 }

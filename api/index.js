@@ -71,13 +71,15 @@ app.post('/createUser', (req, res) => {
 app.get('/getInventory', (req, res) => {
     var token = lib.getToken(req)
     var {err, result} = lib.verifyToken(token)
-    console.log(err, result)
     if(!err){
         pool.getConnection()
         .then(conn => {
-            console.log(result)
             let access = result.access;
-            conn.query(`SELECT name, quantity, type, description FROM inventory WHERE type IN (${access})`)
+            let query = `SELECT name, quantity, type, description FROM inventory WHERE type IN (${access})`
+            if(access === "0"){
+                query = `SELECT name, quantity, type, description FROM inventory`
+            }
+            conn.query(query)
                 .then((rows) => {
                     console.log(rows)
                     res.status(200).json(rows).send()
