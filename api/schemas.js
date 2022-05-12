@@ -17,9 +17,10 @@ const addItemSchema = {
     properties: {
         name: {type: "string"},
         quantity: {type: "number"},
-        type: {type: "number"}
+        type: {type: "number"},
+        description: {type: "string"}
     },
-    required: ["name", "quantity", "type"],
+    required: ["name", "quantity", "type", "description"],
     additionalProperties: false,
 };
 
@@ -28,9 +29,10 @@ const updateItemSchema = {
     properties: {
         name: {type: "string"},
         new_name: {type: "string"},
-        new_quantity: {type: "number"}
+        new_quantity: {type: "number"},
+        new_description: {type: "string"}
     },
-    required: ["name", "new_item", "new_quantity"],
+    required: ["name", "new_name", "new_quantity", "new_description"],
     additionalProperties: false,
 };
 
