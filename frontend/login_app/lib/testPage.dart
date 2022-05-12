@@ -21,19 +21,16 @@ class TestPage extends StatefulWidget {
 class _TestPageState extends State<TestPage> {
   late Future<List<Data>> futureData;
   String now = DateFormat("yyyy-MM-dd").format(DateTime.now());
-  String name = "banan";
-  int quantity = 1;
-  int type = 1;
 
   @override
   void initState() {
     super.initState();
-    futureData = fetchData();
+    futureData = getInventory();
   }
 
-  Future<List<Data>> fetchData() async {
+  Future<List<Data>> getInventory() async {
     final response = await http
-        //.get(Uri.parse('https://jsonplaceholder.typicode.com/albums'));
+        //.get(Uri.parse('http://localhost:2022/getInventory'));
         .get(Uri.parse('https://jsonplaceholder.typicode.com/albums'));
     if (response.statusCode == 200) {
       List jsonResponse = json.decode(response.body);
@@ -43,7 +40,7 @@ class _TestPageState extends State<TestPage> {
     }
   }
 
-  Future<void> addItem() async {
+  Future<void> addItem(String name, int quantity, int type) async {
     final response = await http
         .post(Uri.parse('http://localhost:2022/addItem'), //något liknande här
             body: {"name": name, "quantity": quantity, "type": type});
@@ -59,6 +56,58 @@ class _TestPageState extends State<TestPage> {
           ],
         ),
       );
+    } else {
+      throw Exception('Unexpected error occured!');
+    }
+  }
+
+  Future<void> updateItem(String name, int quantity, int type) async {
+    final response = await http.post(
+        Uri.parse('http://localhost:2022/updateItem'), //något liknande här
+        body: {"name": name, "quantity": quantity, "type": type});
+    if (response.statusCode == 201) {
+      showDialog<String>(
+        context: context,
+        builder: (BuildContext context) => AlertDialog(
+          title: const Text("Item updated"),
+          actions: <Widget>[
+            TextButton(
+                onPressed: () => Navigator.pop(context, 'OK'),
+                child: const Text('OK')),
+          ],
+        ),
+      );
+    } else {
+      throw Exception('Unexpected error occured!');
+    }
+  }
+
+  Future<void> removeItem(String name) async {
+    final response = await http.post(
+        Uri.parse('http://localhost:2022/removeItem'), //något liknande här
+        body: {"name": name});
+    if (response.statusCode == 200) {
+      showDialog<String>(
+        context: context,
+        builder: (BuildContext context) => AlertDialog(
+          title: const Text("Item removed"),
+          actions: <Widget>[
+            TextButton(
+                onPressed: () => Navigator.pop(context, 'OK'),
+                child: const Text('OK')),
+          ],
+        ),
+      );
+    } else {
+      throw Exception('Unexpected error occured!');
+    }
+  }
+
+  Future<void> logout() async {
+    final response = await http.post(
+      Uri.parse('http://localhost:2022/logout'), //något liknande här
+    );
+    if (response.statusCode == 200) {
     } else {
       throw Exception('Unexpected error occured!');
     }
@@ -232,7 +281,7 @@ class _TestPageState extends State<TestPage> {
                             ),
                             child: ElevatedButton.icon(
                               onPressed: () async {
-                                await addItem;
+                                //await addItem("banana", 1, 1);
                                 //lägg till item funktion här
                               },
                               style: ButtonStyle(

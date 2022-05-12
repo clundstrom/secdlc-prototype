@@ -1,6 +1,5 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:login_app/homePage.dart';
 import 'package:login_app/signUpPage.dart';
 import 'package:login_app/testPage.dart';
 import 'package:http/http.dart' as http;
@@ -48,13 +47,19 @@ class _SignInFormState extends State<LoginPage> {
   String currentTextUsername = "";
   String currentTextPW = "";
 
-  void postData() async {
-    http.post(Uri.parse('http://localhost:2022/login'), //något liknande här
-        body: {"username": currentTextUsername, "password": currentTextPW},
-        headers: {"Accept": "application/json"});
+  Future<void> login(String username, String password) async {
+    final response = await http
+        .post(Uri.parse('http://localhost:2022/login'), //något liknande här
+            body: {"username": username, "password": password});
+    if (response.statusCode == 200) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const TestPage()),
+      );
+    } else {
+      throw Exception('Unexpected error occured!');
+    }
   }
-
-  // http://localhost:2022/api/getInventory
 
   @override
   Widget build(BuildContext context) {
@@ -129,14 +134,17 @@ class _SignInFormState extends State<LoginPage> {
               child: MaterialButton(
                 minWidth: MediaQuery.of(context).size.width,
                 padding: const EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 20.0),
-                onPressed: () {
+                onPressed: () async {
+                  await login(currentTextUsername, currentTextPW);
                   //skicka data från textfields här
+                  /*
                   if (1 == 1) {
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => const TestPage()),
                     );
                   }
+                  */
                 },
                 child: const Text(
                   "Login",
