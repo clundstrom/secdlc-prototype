@@ -35,7 +35,8 @@ Current idea is to just respond with HTTP 200, and remove the token from an acti
 {
     name: String,
     quantity: Number,
-    type: Number
+    type: Number,
+    description: String
 }
 ```
 **Response**

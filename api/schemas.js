@@ -17,9 +17,10 @@ const addItemSchema = {
     properties: {
         name: {type: "string"},
         quantity: {type: "number"},
-        type: {type: "number"}
+        type: {type: "number"},
+        description: {type: "string"}
     },
-    required: ["name", "quantity", "type"],
+    required: ["name", "quantity", "type", "description"],
     additionalProperties: false,
 };
 

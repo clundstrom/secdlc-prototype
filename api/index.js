@@ -79,7 +79,6 @@ app.get('/getInventory', (req, res) => {
                 }
                 conn.query(query)
                     .then((rows) => {
-                        console.log(rows)
                         res.status(200).json(rows).send()
                         conn.end();
                     })
@@ -92,12 +91,38 @@ app.get('/getInventory', (req, res) => {
 
 app.post('/addItem', (req, res) => {
     lib.verifySchema(req.body, SCHEMAS.addItemSchema, (result, errors) => {
-        if (result) {
-            res.status(201).send("Item added successfuly succesful")
-        } else {
+        if (!result) {
             console.log(new Date(), ": ", JSON.stringify(errors));
-            res.status(400).send("Invalid post parameters");
+            return res.status(400).send("Invalid post parameters");
         }
+        lib.getToken(req, res, (token) => {
+            lib.verifyToken(token, res, (result) => {
+                pool.getConnection()
+                .then(conn => {
+                    let access = result.access;
+                    if(access === "0"){
+                        var body = req.body;
+                        let query = "INSERT INTO inventory (name, quantity, type, description) value (?, ?, ?, ?)"
+                        body.description = body.description || "";
+                        conn.query(query, [body.name, body.quantity, body.type, body.description])
+                        .then((query_result) => {
+                            res.status(201).send("Item added successfuly succesful")
+                            conn.end();
+                        }).catch(error => {
+                            if(error.code === 'ER_DUP_ENTRY'){
+                                res.status(400).send("Item already exists")
+                            } else {
+                                res.status(500).send()
+                            }  
+                        })
+                    } else {
+                        res.status(401).send("Invalid access level")
+                    }   
+                }).catch(error => {
+                    //not connected
+                    res.status(401).send(error)
+                })
+        })});  
     });
 });
 
