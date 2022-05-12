@@ -26,7 +26,6 @@ app.post('/login', (req, res) => {
     const hash =
         lib.verifySchema(req.body, SCHEMAS.loginSchema, (result, errors) => {
             if (result) {
-
                 pool.getConnection()
                     .then(conn => {
                         conn.query(`SELECT hash, access FROM users WHERE name = ?`, [username])
@@ -69,29 +68,26 @@ app.post('/createUser', (req, res) => {
 });
 
 app.get('/getInventory', (req, res) => {
-    var token = lib.getToken(req)
-    var {err, result} = lib.verifyToken(token)
-    if(!err){
-        pool.getConnection()
-        .then(conn => {
-            let access = result.access;
-            let query = `SELECT name, quantity, type, description FROM inventory WHERE type IN (${access})`
-            if(access === "0"){
-                query = `SELECT name, quantity, type, description FROM inventory`
-            }
-            conn.query(query)
-                .then((rows) => {
-                    console.log(rows)
-                    res.status(200).json(rows).send()
-                    conn.end();
-                })
-        }).catch(err => {
-            //not connected
-            res.status(401).send(err)
-        });
-    } else {
-        res.status(401).send(result)
-    }
+    lib.getToken(req, res, (token) => {
+        lib.verifyToken(token, res, (result) => {
+            pool.getConnection()
+            .then(conn => {
+                let access = result.access;
+                let query = `SELECT name, quantity, type, description FROM inventory WHERE type IN (${access})`
+                if(access === "0"){
+                    query = `SELECT name, quantity, type, description FROM inventory`
+                }
+                conn.query(query)
+                    .then((rows) => {
+                        console.log(rows)
+                        res.status(200).json(rows).send()
+                        conn.end();
+                    })
+            }).catch(error => {
+                //not connected
+                res.status(401).send(error)
+        })
+    })});
 });
 
 app.post('/addItem', (req, res) => {

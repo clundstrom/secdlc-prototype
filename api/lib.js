@@ -1,32 +1,34 @@
 const Ajv = require("ajv")
 const jwt = require('jsonwebtoken')
 
-function getToken(req) {
+function generateToken(payload){
+  var priv = Buffer.from(process.env.PRIV, 'base64').toString('ascii')
+  return jwt.sign(payload, priv, { algorithm: 'RS256'})
+}
+
+function getToken(req, res, callback) {
   var bearerToken;
   try{
     const bearerHeader = req.headers['authorization'];
     const bearer = bearerHeader.split(' ');
     bearerToken = bearer[1];
   } catch(err){
-    return {"err":"No token in Authorization Bearer Header"}
+    console.log(new Date(), ": No token ", err.name, err.message)
+    res.status(400).send("No token in Authorization Header Bearer")
+    return;
   }
-  return {"token":bearerToken}
+  callback(bearerToken)
 }
 
-function generateToken(payload){
-  var priv = Buffer.from(process.env.PRIV, 'base64').toString('ascii')
-  return jwt.sign(payload, priv, { algorithm: 'RS256'})
-}
-
-function verifyToken(payload){
+function verifyToken(payload, res, callback){
   var pub = Buffer.from(process.env.PUB, 'base64').toString('ascii')
   try{
-    var body = jwt.verify(payload, pub, { algorithm: 'RS256'})
+    var result = jwt.verify(payload, pub, { algorithm: 'RS256'})
   } catch(err){
     console.log(new Date(), ": ", err.name, err.message)
-    return {"err":true, "result": err.name + " " + err.message}
+    return res.status(401).send(err.name + " " + err.message)
   }
-  return {"err":false, "result":body}
+  callback(result)
 }
 
 function verifySchema(payload, schema, callback) {
