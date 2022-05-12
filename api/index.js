@@ -128,12 +128,38 @@ app.post('/addItem', (req, res) => {
 
 app.post('/removeItem', (req, res) => {
     lib.verifySchema(req.body, SCHEMAS.removeItemSchema, (result, errors) => {
-        if (result) {
-            res.status(200).send("Removal succesful")
-        } else {
+        if (!result) {
             console.log(new Date(), ": ", JSON.stringify(errors));
-            res.status(400).send("Invalid post parameters");
+            return res.status(400).send("Invalid post parameters");
         }
+        lib.getToken(req, res, (token) => {
+            lib.verifyToken(token, res, (result) => {
+                pool.getConnection()
+                .then(conn => {
+                    let access = result.access;
+                    if(access === "0"){
+                        var body = req.body;
+                        let query = "DELETE FROM inventory WHERE name = ?"
+                        conn.query(query, [body.name])
+                        .then((query_result) => {
+                            if(query_result.affectedRows === 0){
+                                res.status(200).send("No item removed/No item by that name")
+                            } else {
+                            res.status(200).send("Removed item successfully")
+
+                            }
+                            conn.end();
+                        }).catch(error => {
+                            res.status(500).send()
+                        })
+                    } else {
+                        res.status(401).send("Invalid access level")
+                    }   
+                }).catch(error => {
+                    //not connected
+                    res.status(401).send(error)
+                })
+        })});  
     });
 });
 
