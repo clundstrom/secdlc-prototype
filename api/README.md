@@ -57,9 +57,12 @@ HTTP response 200 + text body
 {
     name: String ,
     new_name: String,
-    new_quantity: Number
+    new_quantity: Number,
+    new_Description: String
 }
 ```
+If arguments are left empty this will reflect in the Database, so it is best if the client verifies the original values of items, and replaces empty values with those. This will prevent items from losing properties. In the futures this might be remedied on the API side.
+
 ### Inventory Types
 | Item type | Access level |
 | --------- | ------------ |

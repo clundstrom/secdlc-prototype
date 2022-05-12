@@ -165,12 +165,39 @@ app.post('/removeItem', (req, res) => {
 
 app.post('/updateitem', (req, res) => {
     lib.verifySchema(req.body, SCHEMAS.updateItemSchema, (result, errors) => {
-        if (result) {
-            res.status(200).send("Update succesful")
-        } else {
+        if (!result) {
             console.log(new Date(), ": ", JSON.stringify(errors));
-            res.status(400).send("Invalid post parameters");
+            return res.status(400).send("Invalid post parameters");
         }
+        lib.getToken(req, res, (token) => {
+            lib.verifyToken(token, res, (result) => {
+                pool.getConnection()
+                .then(conn => {
+                    let access = result.access;
+                    if(access === "0"){
+                        var body = req.body;
+                        let query = `UPDATE inventory
+                                     SET name = ?, quantity = ?
+                                     WHERE name = ?`;
+                        conn.query(query, [body.new_name, body.new_quantity, body.name])
+                        .then((query_result) => {
+                            if(query_result.affectedRows === 0){
+                                res.status(200).send("No item updated/No item by that name")
+                            } else {
+                                res.status(200).send("Updated item successfully")
+                            }
+                            conn.end();
+                        }).catch(error => {
+                            res.status(500).send()
+                        })
+                    } else {
+                        res.status(401).send("Invalid access level")
+                    }   
+                }).catch(error => {
+                    //not connected
+                    res.status(401).send(error)
+                })
+        })});  
     });
 });
 
