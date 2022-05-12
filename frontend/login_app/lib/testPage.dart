@@ -48,15 +48,19 @@ class _TestPageState extends State<TestPage> {
         .post(Uri.parse('http://localhost:2022/addItem'), //något liknande här
             body: {"name": name, "quantity": quantity, "type": type});
     if (response.statusCode == 201) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const SignUpScreen()),
+      showDialog<String>(
+        context: context,
+        builder: (BuildContext context) => AlertDialog(
+          title: const Text("Item added"),
+          actions: <Widget>[
+            TextButton(
+                onPressed: () => Navigator.pop(context, 'OK'),
+                child: const Text('OK')),
+          ],
+        ),
       );
     } else {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const LoginPage()),
-      );
+      throw Exception('Unexpected error occured!');
     }
   }
 

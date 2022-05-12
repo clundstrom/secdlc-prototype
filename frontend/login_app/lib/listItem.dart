@@ -103,6 +103,21 @@ class ListItem extends StatelessWidget {
           InkWell(
             onTap: () {
               //Deletefunktion här
+              showDialog<String>(
+                context: context,
+                builder: (BuildContext context) => AlertDialog(
+                  title: const Text("Confirm"),
+                  content: const Text("Do you want to delete the item?"),
+                  actions: <Widget>[
+                    TextButton(
+                        onPressed: () => Navigator.pop(context, 'OK'),
+                        child: const Text('OK')),
+                    TextButton(
+                        onPressed: () => Navigator.pop(context, 'Cancel'),
+                        child: const Text('Cancel')),
+                  ],
+                ),
+              );
             },
             child: const Padding(
               padding: EdgeInsets.all(20.0),
