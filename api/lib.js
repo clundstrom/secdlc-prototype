@@ -2,10 +2,15 @@ const Ajv = require("ajv")
 const jwt = require('jsonwebtoken')
 
 function getToken(req) {
-  const bearerHeader = req.headers['authorization'];
-  const bearer = bearerHeader.split(' ');
-  const bearerToken = bearer[1];
-  return bearerToken;
+  var bearerToken;
+  try{
+    const bearerHeader = req.headers['authorization'];
+    const bearer = bearerHeader.split(' ');
+    bearerToken = bearer[1];
+  } catch(err){
+    return {"err":"No token in Authorization Bearer Header"}
+  }
+  return {"token":bearerToken}
 }
 
 function generateToken(payload){
