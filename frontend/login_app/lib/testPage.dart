@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:login_app/LoginPage.dart';
@@ -21,6 +23,7 @@ class TestPage extends StatefulWidget {
 class _TestPageState extends State<TestPage> {
   late Future<List<Data>> futureData;
   String now = DateFormat("yyyy-MM-dd").format(DateTime.now());
+  String token = "";
 
   @override
   void initState() {
@@ -31,7 +34,14 @@ class _TestPageState extends State<TestPage> {
   Future<List<Data>> getInventory() async {
     final response = await http
         //.get(Uri.parse('http://localhost:2022/getInventory'));
-        .get(Uri.parse('https://jsonplaceholder.typicode.com/albums'));
+        .get(
+      Uri.parse('https://jsonplaceholder.typicode.com/albums'),
+      headers: {
+        HttpHeaders.contentTypeHeader: 'application/json',
+        'Accept': 'application/json',
+        'Authorization': token,
+      },
+    );
     if (response.statusCode == 200) {
       List jsonResponse = json.decode(response.body);
       return jsonResponse.map((data) => Data.fromJson(data)).toList();

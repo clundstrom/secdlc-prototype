@@ -52,11 +52,6 @@ class _SignInFormState extends State<LoginPage> {
   String currentTextPW = "";
 
   Future<int> login(String username, String password) async {
-    final msg = jsonEncode({
-      "message": username,
-      "password": password,
-    });
-
     Map data = {"username": username, "password": password};
 
     var body = json.encode(data);
@@ -71,27 +66,8 @@ class _SignInFormState extends State<LoginPage> {
       body: body,
     );
     if (response.statusCode == 200) {
-      /*
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const TestPage()),
-      );
-      */
       return response.statusCode;
     } else {
-      /*
-      showDialog<String>(
-        context: context,
-        builder: (BuildContext context) => AlertDialog(
-          title: const Text("Error"),
-          actions: <Widget>[
-            TextButton(
-                onPressed: () => Navigator.pop(context, 'OK'),
-                child: const Text('OK')),
-          ],
-        ),
-      );
-      */
       return response.statusCode;
     }
   }
@@ -103,54 +79,6 @@ class _SignInFormState extends State<LoginPage> {
     return null;
   }
 
-  /*
-  final Dio _dio = Dio();
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-
-  Future<Response> loginResponse(String email, String password) async {
-    try {
-      Response response = await _dio.post(
-        'http://localhost:2022/login',
-        data: {'email': email, 'password': password},
-      );
-      //returns the successful user data json object
-      return response.data;
-    } on DioError catch (e) {
-      //returns the error object if any
-      return e.response!.data;
-    }
-  }
-
-  Future<void> login() async {
-    if (_formKey.currentState!.validate()) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: const Text('Processing Data'),
-        backgroundColor: Colors.green.shade300,
-      ));
-
-      dynamic res = await loginResponse(
-        usernameTextController.text,
-        passwordTextController.text,
-      );
-
-      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-
-      if (res['ErrorCode'] == null) {
-        String accessToken = res['access_token'];
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-                //builder: (context) => TestPage(accesstoken: accessToken)));
-                builder: (context) => TestPage()));
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('Error: ${res['Message']}'),
-          backgroundColor: Colors.red.shade300,
-        ));
-      }
-    }
-  }
-*/
   @override
   Widget build(BuildContext context) {
     return Form(
@@ -239,8 +167,7 @@ class _SignInFormState extends State<LoginPage> {
                     showDialog<String>(
                       context: context,
                       builder: (BuildContext context) => AlertDialog(
-                        title: Text(
-                            username + password + " " + statuscode.toString()),
+                        title: Text("Error " + statuscode.toString()),
                         actions: <Widget>[
                           TextButton(
                               onPressed: () => Navigator.pop(context, 'OK'),
@@ -249,15 +176,6 @@ class _SignInFormState extends State<LoginPage> {
                       ),
                     );
                   }
-                  //skicka data från textfields här
-                  /*
-                  if (1 == 1) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const TestPage()),
-                    );
-                  }
-                  */
                 },
                 child: const Text(
                   "Login",
