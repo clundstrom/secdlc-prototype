@@ -95,6 +95,7 @@ class _TestPageState extends State<TestPage> {
                       'Project Info',
                       style: TextStyle(fontSize: 20, color: Colors.grey),
                     ),
+                    
                   ),
                   Padding(
                     padding: EdgeInsets.only(
@@ -167,7 +168,7 @@ class _TestPageState extends State<TestPage> {
                             padding: const EdgeInsets.all(3.0),
                             decoration: BoxDecoration(
                               border: Border.all(color: Colors.black),
-                              color: Colors.black,
+                              color: Colors.white,
                             ),
                             height: size.height * 0.4,
                             width: 500,
@@ -187,7 +188,7 @@ class _TestPageState extends State<TestPage> {
                                           );
                                         });
                                   } else if (snapshot.hasError) {
-                                    return Text("${snapshot.error}");
+                                    return Text("Error: ${snapshot.error}");
                                   }
                                   return const CircularProgressIndicator();
                                 }),
@@ -199,6 +200,17 @@ class _TestPageState extends State<TestPage> {
                             ),
                             child: ElevatedButton.icon(
                               onPressed: () {
+                                showDialog<String>(
+                                  context: context, 
+                                  builder: (BuildContext context) => AlertDialog(
+                                    title: const Text("Item added"),
+                                    actions: <Widget>[
+                                      TextButton(
+                                        onPressed: () => Navigator.pop(context, 'OK'),
+                                        child: const Text('OK')),
+                                    ],
+                                  ),
+                                  );
                                 //lägg till item funktion här
                               },
                               style: ButtonStyle(
@@ -218,6 +230,7 @@ class _TestPageState extends State<TestPage> {
                                 size: 40,
                               ),
                             ),
+                            
                           )
                         ])
                   ],
@@ -324,7 +337,26 @@ class ListItem extends StatelessWidget {
           InkWell(
             onTap: () {
               //Deletefunktion här
+                showDialog<String>(
+                                  context: context, 
+                                  builder: (BuildContext context) => AlertDialog(
+                                    title: const Text("Confirm"),
+                                    content: const Text("Do you want to delete the item?"),
+                                    actions: <Widget>[
+                                      TextButton(
+                                        onPressed: () => Navigator.pop(context, 'OK'),
+                                        child: const Text('OK')
+                                        ),
+                                        TextButton(
+                                        onPressed: () => Navigator.pop(context, 'Cancel'),
+                                        child: const Text('Cancel')
+                                        ),
+                                    ],
+                                  ),
+                                  );
             },
+
+
             child: const Padding(
               padding: EdgeInsets.all(20.0),
               child: Icon(
