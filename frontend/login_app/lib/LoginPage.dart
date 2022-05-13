@@ -1,8 +1,12 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:login_app/homePage.dart';
 import 'package:login_app/signUpPage.dart';
 import 'package:login_app/testPage.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'dart:io';
+import 'dart:async';
 
 class LoginPage extends StatefulWidget {
   const LoginPage();
@@ -44,8 +48,36 @@ class SignInScreen extends StatelessWidget {
 class _SignInFormState extends State<LoginPage> {
   final usernameTextController = TextEditingController();
   final passwordTextController = TextEditingController();
-  String currentText = "";
+  String currentTextUsername = "";
   String currentTextPW = "";
+
+  Future<int> login(String username, String password) async {
+    Map data = {"username": username, "password": password};
+
+    var body = json.encode(data);
+
+    final response = await http.post(
+      Uri.parse('http://localhost:2022/login'),
+      headers: {
+        HttpHeaders.contentTypeHeader: 'application/json',
+      }, //något liknande här
+      //body: {"username": "root","password": "root"}
+      //body: msg,
+      body: body,
+    );
+    if (response.statusCode == 200) {
+      return response.statusCode;
+    } else {
+      return response.statusCode;
+    }
+  }
+
+  Future<String?> attemptLogIn(String username, String password) async {
+    var res = await http.post(Uri.parse('http://localhost:2022/login'),
+        body: {"username": username, "password": password});
+    if (res.statusCode == 200) return res.body;
+    return null;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -81,9 +113,9 @@ class _SignInFormState extends State<LoginPage> {
               ),
               validator: (value) =>
                   value!.isEmpty ? 'Email can\'t be empty' : null,
-              onSaved: (value) => currentText = value!.trim(),
+              onSaved: (value) => currentTextUsername = value!.trim(),
               onChanged: (val) {
-                setState(() => currentText = val);
+                setState(() => currentTextUsername = val);
               },
             ),
           ),
@@ -120,12 +152,28 @@ class _SignInFormState extends State<LoginPage> {
               child: MaterialButton(
                 minWidth: MediaQuery.of(context).size.width,
                 padding: const EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 20.0),
-                onPressed: () {
-                  //skicka data från textfields här
-                  if (1 == 1) {
+                onPressed: () async {
+                  String username = usernameTextController.text;
+                  String password = passwordTextController.text;
+                  var statuscode = await login(username, password);
+
+                  //if (statuscode == 200) {
+                  if (statuscode == 200) {
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => const TestPage()),
+                    );
+                  } else {
+                    showDialog<String>(
+                      context: context,
+                      builder: (BuildContext context) => AlertDialog(
+                        title: Text("Error " + statuscode.toString()),
+                        actions: <Widget>[
+                          TextButton(
+                              onPressed: () => Navigator.pop(context, 'OK'),
+                              child: const Text('OK')),
+                        ],
+                      ),
                     );
                   }
                 },

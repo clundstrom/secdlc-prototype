@@ -1,5 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:login_app/LoginPage.dart';
+import 'package:login_app/listItem.dart';
+import 'package:login_app/signUpPage.dart';
+import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'jsonData.dart';
 import 'dart:async';
 import 'dart:convert';
@@ -17,18 +23,99 @@ class TestPage extends StatefulWidget {
 class _TestPageState extends State<TestPage> {
   late Future<List<Data>> futureData;
   String now = DateFormat("yyyy-MM-dd").format(DateTime.now());
+  String token = "";
+
   @override
   void initState() {
     super.initState();
-    futureData = fetchData();
+    futureData = getInventory();
   }
 
-  Future<List<Data>> fetchData() async {
+  Future<List<Data>> getInventory() async {
     final response = await http
-        .get(Uri.parse('https://jsonplaceholder.typicode.com/albums'));
+        //.get(Uri.parse('http://localhost:2022/getInventory'));
+        .get(
+      Uri.parse('https://jsonplaceholder.typicode.com/albums'),
+      headers: {
+        HttpHeaders.contentTypeHeader: 'application/json',
+      },
+    );
     if (response.statusCode == 200) {
       List jsonResponse = json.decode(response.body);
       return jsonResponse.map((data) => Data.fromJson(data)).toList();
+    } else {
+      throw Exception('Unexpected error occured!');
+    }
+  }
+
+  Future<void> addItem(String name, int quantity, int type) async {
+    final response = await http
+        .post(Uri.parse('http://localhost:2022/addItem'), //något liknande här
+            body: {"name": name, "quantity": quantity, "type": type});
+    if (response.statusCode == 201) {
+      showDialog<String>(
+        context: context,
+        builder: (BuildContext context) => AlertDialog(
+          title: const Text("Item added"),
+          actions: <Widget>[
+            TextButton(
+                onPressed: () => Navigator.pop(context, 'OK'),
+                child: const Text('OK')),
+          ],
+        ),
+      );
+    } else {
+      throw Exception('Unexpected error occured!');
+    }
+  }
+
+  Future<void> updateItem(String name, int quantity, int type) async {
+    final response = await http.post(
+        Uri.parse('http://localhost:2022/updateItem'), //något liknande här
+        body: {"name": name, "quantity": quantity, "type": type});
+    if (response.statusCode == 201) {
+      showDialog<String>(
+        context: context,
+        builder: (BuildContext context) => AlertDialog(
+          title: const Text("Item updated"),
+          actions: <Widget>[
+            TextButton(
+                onPressed: () => Navigator.pop(context, 'OK'),
+                child: const Text('OK')),
+          ],
+        ),
+      );
+    } else {
+      throw Exception('Unexpected error occured!');
+    }
+  }
+
+  Future<void> removeItem(String name) async {
+    final response = await http.post(
+        Uri.parse('http://localhost:2022/removeItem'), //något liknande här
+        body: {"name": name});
+    if (response.statusCode == 200) {
+      showDialog<String>(
+        context: context,
+        builder: (BuildContext context) => AlertDialog(
+          title: const Text("Item removed"),
+          actions: <Widget>[
+            TextButton(
+                onPressed: () => Navigator.pop(context, 'OK'),
+                child: const Text('OK')),
+          ],
+        ),
+      );
+    } else {
+      throw Exception('Unexpected error occured!');
+    }
+  }
+
+  Future<void> logout() async {
+    final response = await http.post(
+      Uri.parse('http://localhost:2022/logout'), //något liknande här
+    );
+    if (response.statusCode == 200) {
     } else {
       throw Exception('Unexpected error occured!');
     }
@@ -44,6 +131,7 @@ class _TestPageState extends State<TestPage> {
         height: size.height,
         width: size.width,
         child: Row(mainAxisAlignment: MainAxisAlignment.start, children: [
+          //username + log out column
           Padding(
             padding: EdgeInsets.only(bottom: 40, top: 40),
             child: SizedBox(
@@ -95,7 +183,6 @@ class _TestPageState extends State<TestPage> {
                       'Project Info',
                       style: TextStyle(fontSize: 20, color: Colors.grey),
                     ),
-                    
                   ),
                   Padding(
                     padding: EdgeInsets.only(
@@ -111,6 +198,7 @@ class _TestPageState extends State<TestPage> {
               ),
             ),
           ),
+          //Vit box
           Padding(
             padding: EdgeInsets.only(top: 10, bottom: 10),
             child: SizedBox(
@@ -121,6 +209,7 @@ class _TestPageState extends State<TestPage> {
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(24.0)),
                 child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -170,8 +259,8 @@ class _TestPageState extends State<TestPage> {
                               border: Border.all(color: Colors.black),
                               color: Colors.white,
                             ),
-                            height: size.height * 0.4,
-                            width: 500,
+                            height: size.height * 0.6,
+                            width: size.width * 0.4,
                             child: FutureBuilder<List<Data>>(
                                 future: futureData,
                                 builder: (context, snapshot) {
@@ -201,16 +290,18 @@ class _TestPageState extends State<TestPage> {
                             child: ElevatedButton.icon(
                               onPressed: () {
                                 showDialog<String>(
-                                  context: context, 
-                                  builder: (BuildContext context) => AlertDialog(
+                                  context: context,
+                                  builder: (BuildContext context) =>
+                                      AlertDialog(
                                     title: const Text("Item added"),
                                     actions: <Widget>[
                                       TextButton(
-                                        onPressed: () => Navigator.pop(context, 'OK'),
-                                        child: const Text('OK')),
+                                          onPressed: () =>
+                                              Navigator.pop(context, 'OK'),
+                                          child: const Text('OK')),
                                     ],
                                   ),
-                                  );
+                                );
                                 //lägg till item funktion här
                               },
                               style: ButtonStyle(
@@ -230,139 +321,118 @@ class _TestPageState extends State<TestPage> {
                                 size: 40,
                               ),
                             ),
-                            
                           )
-                        ])
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ]),
-      ),
-    );
-  }
-}
-
-class ListItem extends StatelessWidget {
-  static const colorDarkRed = Color(0xffb66a6b);
-  final int quantity;
-  final String name;
-  final String type;
-
-  ListItem(this.quantity, this.name, this.type);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(color: Colors.white),
-      child: Padding(
-        padding: const EdgeInsets.only(bottom: 8.0),
-        child:
-            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              ClipRRect(
-                borderRadius: BorderRadius.circular(5.0),
-                child: Container(
-                  margin: const EdgeInsets.only(bottom: 6.0),
-                  decoration: BoxDecoration(
-                    color: Colors.grey,
-                    borderRadius: BorderRadius.circular(5.0),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Colors.grey,
-                        offset: Offset(0.0, 1.0), //(x,y)
-                        blurRadius: 6.0,
+                        ]),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.grey.withOpacity(0.35),
                       ),
-                    ],
-                  ),
-                  height: 80.0,
-                  width: 80.0,
-                  child: const Icon(
-                    Icons.shopping_cart,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-              const SizedBox(
-                width: 16.0,
-              ),
-              Container(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    const SizedBox(
-                      height: 8.0,
+                      width: size.width * 0.25,
+                      height: size.height,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Padding(
+                            padding: EdgeInsets.only(top: 40.0, left: 25),
+                            child: Text(
+                              'Inventory Overlook',
+                              style: TextStyle(
+                                fontSize: 28,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          const Padding(
+                            padding: EdgeInsets.only(left: 25, top: 40),
+                            child: Text("Fruit: " "amount"),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 15.0),
+                            child: LinearPercentIndicator(
+                              width: size.width * 0.20,
+                              animation: true,
+                              lineHeight: 10.0,
+                              animationDuration: 2000,
+                              percent: 0.9,
+                              //center: const Text("90.0%"),
+                              barRadius: const Radius.circular(16),
+                              progressColor: Colors.green,
+                            ),
+                          ),
+                          const Padding(
+                            padding: EdgeInsets.only(left: 25, top: 40),
+                            child: Text("Meat: " "amount"),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 15.0),
+                            child: LinearPercentIndicator(
+                              width: size.width * 0.20,
+                              animation: true,
+                              lineHeight: 10.0,
+                              animationDuration: 2500,
+                              percent: 0.1,
+                              //center: const Text("80.0%"),
+                              barRadius: const Radius.circular(16),
+                              progressColor: Colors.green,
+                            ),
+                          ),
+                          const Padding(
+                            padding: EdgeInsets.only(left: 25, top: 40),
+                            child: Text("Cleaning: " "amount"),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 15.0),
+                            child: LinearPercentIndicator(
+                              width: size.width * 0.20,
+                              animation: true,
+                              lineHeight: 10.0,
+                              animationDuration: 2500,
+                              percent: 0.7,
+                              //center: const Text("80.0%"),
+                              barRadius: const Radius.circular(16),
+                              progressColor: Colors.green,
+                            ),
+                          ),
+                          const Padding(
+                            padding: EdgeInsets.only(left: 25, top: 40),
+                            child: Text("Snacks: " "amount"),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 15.0),
+                            child: LinearPercentIndicator(
+                              width: size.width * 0.20,
+                              animation: true,
+                              lineHeight: 10.0,
+                              animationDuration: 2500,
+                              percent: 0.3,
+                              //center: const Text("80.0%"),
+                              barRadius: const Radius.circular(16),
+                              progressColor: Colors.green,
+                            ),
+                          ),
+                          const Padding(
+                            padding: EdgeInsets.only(left: 25, top: 40),
+                            child: Text("Office: " "amount"),
+                          ),
+                          Padding(
+                            padding:
+                                const EdgeInsets.only(left: 15.0, bottom: 150),
+                            child: LinearPercentIndicator(
+                              width: size.width * 0.20,
+                              animation: true,
+                              lineHeight: 10.0,
+                              animationDuration: 2500,
+                              percent: 0.5,
+                              //center: const Text("80.0%"),
+                              barRadius: const Radius.circular(16),
+                              progressColor: Colors.green,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                    Text(
-                      name,
-                      style: const TextStyle(
-                          fontSize: 22.0, fontWeight: FontWeight.w600),
-                    ),
-                    SizedBox(
-                        width: 200.0,
-                        child: Text(
-                          type,
-                          style: TextStyle(fontSize: 17.0, color: Colors.grey),
-                        )),
                   ],
                 ),
-              ),
-            ],
-          ),
-          Container(
-            decoration: BoxDecoration(
-                color: Colors.white, borderRadius: BorderRadius.circular(4.0)),
-            child: Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-              child: Row(
-                children: <Widget>[
-                  const Icon(
-                    Icons.format_list_numbered,
-                    size: 20.0,
-                    color: Colors.black,
-                  ),
-                  Text(quantity.toString(),
-                      style: const TextStyle(
-                        color: Colors.black,
-                        fontSize: 17.0,
-                      ))
-                ],
-              ),
-            ),
-          ),
-          InkWell(
-            onTap: () {
-              //Deletefunktion här
-                showDialog<String>(
-                                  context: context, 
-                                  builder: (BuildContext context) => AlertDialog(
-                                    title: const Text("Confirm"),
-                                    content: const Text("Do you want to delete the item?"),
-                                    actions: <Widget>[
-                                      TextButton(
-                                        onPressed: () => Navigator.pop(context, 'OK'),
-                                        child: const Text('OK')
-                                        ),
-                                        TextButton(
-                                        onPressed: () => Navigator.pop(context, 'Cancel'),
-                                        child: const Text('Cancel')
-                                        ),
-                                    ],
-                                  ),
-                                  );
-            },
-
-
-            child: const Padding(
-              padding: EdgeInsets.all(20.0),
-              child: Icon(
-                Icons.delete,
-                size: 30.0,
-                color: Colors.black,
               ),
             ),
           ),
