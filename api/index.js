@@ -12,10 +12,12 @@ const host = process.env.HOST || "127.0.0.1"
 const DB_USER = process.env.DB_USER || "authio_service_account"
 const DB_HOST = process.env.DB_HOST || "127.0.0.1"
 const DB_PASS = process.env.DB_PASS || "<your_mysql_password>"
-console.log(DB_USER, DB_HOST, DB_PASS)
+const mw = require('./middleware.js');
+const dayjs = require('dayjs');
 const pool = mariadb.createPool({ host: DB_HOST, user: DB_USER, password: DB_PASS, database: "authio", connectionLimit: 5 });
 
-app.use(express.json())
+
+mw.run(app, express)
 
 app.get('/', (req, res) => {
     res.send('Nothing to see here ')
@@ -41,7 +43,12 @@ app.post('/login', (req, res) => {
                                     if (result) {
                                         let token = lib.generateToken({ user: username, access: access })
                                         console.log("Generated token: ", token)
-                                        res.status(200).cookie("webToken", token).send("Login successful")
+                                        res.cookie("webToken", token, {
+                                            secure: false,
+                                            httpOnly: true,
+                                            expires: dayjs().add(30, "days").toDate(),
+                                          }).status(200).send("Login successful")
+                                        //res.status(200).cookie("webToken", token).send("Login successful")
                                     } else {
                                         res.status(401).send("Invalid credentials")
                                     }
@@ -68,6 +75,7 @@ app.post('/createUser', (req, res) => {
 });
 
 app.get('/getInventory', (req, res) => {
+    //console.log(req.cookies)
     lib.getToken(req, res, (token) => {
         lib.verifyToken(token, res, (result) => {
             pool.getConnection()

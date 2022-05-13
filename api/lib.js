@@ -7,17 +7,14 @@ function generateToken(payload){
 }
 
 function getToken(req, res, callback) {
-  var bearerToken;
-  try{
-    const bearerHeader = req.headers['authorization'];
-    const bearer = bearerHeader.split(' ');
-    bearerToken = bearer[1];
-  } catch(err){
-    console.log(new Date(), ": No token ", err.name, err.message)
-    res.status(400).send("No token in Authorization Header Bearer")
-    return;
+  var token;
+  if(req.cookies && req.cookies.webToken){
+    token = req.cookies.webToken
+  } else {
+    console.log(new Date(), ": No token in cookies")
+    return res.status(400).send("No token in HttpOnly webToken cookie")
   }
-  callback(bearerToken)
+  callback(token)
 }
 
 function verifyToken(payload, res, callback){
