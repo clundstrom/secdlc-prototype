@@ -38,8 +38,6 @@ class _TestPageState extends State<TestPage> {
       Uri.parse('https://jsonplaceholder.typicode.com/albums'),
       headers: {
         HttpHeaders.contentTypeHeader: 'application/json',
-        'Accept': 'application/json',
-        'Authorization': token,
       },
     );
     if (response.statusCode == 200) {
