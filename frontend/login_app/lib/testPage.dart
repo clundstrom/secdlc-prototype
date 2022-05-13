@@ -257,7 +257,7 @@ class _TestPageState extends State<TestPage> {
                             padding: const EdgeInsets.all(3.0),
                             decoration: BoxDecoration(
                               border: Border.all(color: Colors.black),
-                              color: Colors.black,
+                              color: Colors.white,
                             ),
                             height: size.height * 0.6,
                             width: size.width * 0.4,
@@ -277,7 +277,7 @@ class _TestPageState extends State<TestPage> {
                                           );
                                         });
                                   } else if (snapshot.hasError) {
-                                    return Text("${snapshot.error}");
+                                    return Text("Error: ${snapshot.error}");
                                   }
                                   return const CircularProgressIndicator();
                                 }),
@@ -288,8 +288,20 @@ class _TestPageState extends State<TestPage> {
                               left: 80,
                             ),
                             child: ElevatedButton.icon(
-                              onPressed: () async {
-                                //await addItem("banana", 1, 1);
+                              onPressed: () {
+                                showDialog<String>(
+                                  context: context,
+                                  builder: (BuildContext context) =>
+                                      AlertDialog(
+                                    title: const Text("Item added"),
+                                    actions: <Widget>[
+                                      TextButton(
+                                          onPressed: () =>
+                                              Navigator.pop(context, 'OK'),
+                                          child: const Text('OK')),
+                                    ],
+                                  ),
+                                );
                                 //lägg till item funktion här
                               },
                               style: ButtonStyle(

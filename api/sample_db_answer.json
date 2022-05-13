@@ -1,27 +1,32 @@
 {
-    "1": {
-        "name": "test_1",
-        "quantity": 3,
-        "type": "Fruit"
+    "results": [{
+        "name": "Apple",
+        "quantity": 150,
+        "type": 1
     },
-    "2": {
-        "name": "test_2",
+    {
+        "name": "Orange",
+        "quantity": 124,
+        "type": 1
+    },{
+        "name": "Steak",
+        "quantity": 25,
+        "type": 2
+    }, {
+        "name": "Chicken",
         "quantity": 3,
-        "type": "Fruit"
-    },
-    "3": {
-        "name": "test_3",
-        "quantity": 3,
-        "type": "Meat"
-    },
-    "4": {
-        "name": "test_4",
-        "quantity": 3,
-        "type": "Meat"
-    },
-    "5": {
-        "name": "test_5",
-        "quantity": 3,
-        "type": "General"
-    }
+        "type": 2
+    }, {
+        "name": "AJAX",
+        "quantity": 14,
+        "type": 3
+    },{
+        "name": "Pringles Paprika",
+        "quantity": 5,
+        "type": 4
+    },{
+        "name": "Stapler",
+        "quantity": 1,
+        "type": 5
+    }]
 }
