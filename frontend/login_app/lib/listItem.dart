@@ -1,10 +1,12 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:login_app/apiCalls.dart';
+import 'package:login_app/testPage.dart';
 
 class ListItem extends StatelessWidget {
   static const colorDarkRed = Color(0xffb66a6b);
-  final int quantity;
+  final String quantity;
   final String name;
   final String type;
 
@@ -71,7 +73,7 @@ class ListItem extends StatelessWidget {
                     SizedBox(
                         //width: 200.0,
                         child: Text(
-                      " " + type,
+                      type,
                       style: TextStyle(fontSize: 17.0, color: Colors.grey),
                     )),
                   ],
@@ -111,7 +113,15 @@ class ListItem extends StatelessWidget {
                   content: const Text("Do you want to delete the item?"),
                   actions: <Widget>[
                     TextButton(
-                        onPressed: () => Navigator.pop(context, 'OK'),
+                        onPressed: () async {
+                          ApiCalls function = ApiCalls();
+                          try {
+                            await function.removeItem(name);
+                          } catch (e) {
+                            //print('There is an exception.');
+                          }
+                          Navigator.pop(context, 'OK');
+                        },
                         child: const Text('OK')),
                     TextButton(
                         onPressed: () => Navigator.pop(context, 'Cancel'),

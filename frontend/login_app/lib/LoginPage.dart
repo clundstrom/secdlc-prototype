@@ -60,7 +60,7 @@ class _SignInFormState extends State<LoginPage> {
       Uri.parse('http://localhost:2022/login'),
       headers: {
         HttpHeaders.contentTypeHeader: 'application/json',
-      }, //något liknande här
+      },
       //body: {"username": "root","password": "root"}
       //body: msg,
       body: body,

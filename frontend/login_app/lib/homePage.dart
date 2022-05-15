@@ -14,7 +14,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  late Future<List<Data>> futureData;
+  late Future<List<Item>> futureData;
   ScrollController controller = ScrollController();
   bool closeTopContainer = false;
   double topContainer = 0;
@@ -24,12 +24,12 @@ class _HomePageState extends State<HomePage> {
     futureData = fetchData();
   }
 
-  Future<List<Data>> fetchData() async {
+  Future<List<Item>> fetchData() async {
     final response = await http
         .get(Uri.parse('https://jsonplaceholder.typicode.com/albums'));
     if (response.statusCode == 200) {
       List jsonResponse = json.decode(response.body);
-      return jsonResponse.map((data) => Data.fromJson(data)).toList();
+      return jsonResponse.map((data) => Item.fromJson(data)).toList();
     } else {
       throw Exception('Unexpected error occured!');
     }
@@ -109,11 +109,11 @@ class _HomePageState extends State<HomePage> {
                 ),
                 height: 800,
                 width: 450,
-                child: FutureBuilder<List<Data>>(
+                child: FutureBuilder<List<Item>>(
                     future: futureData,
                     builder: (context, snapshot) {
                       if (snapshot.hasData) {
-                        List<Data> data = snapshot.requireData;
+                        List<Item> data = snapshot.requireData;
                         return ListView.builder(
                             physics: const BouncingScrollPhysics(),
                             itemCount: data.length,
