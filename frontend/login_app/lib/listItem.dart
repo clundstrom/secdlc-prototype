@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:login_app/apiCalls.dart';
+import 'package:login_app/dialogClass.dart';
 import 'package:login_app/testPage.dart';
 
 class ListItem extends StatelessWidget {
@@ -73,7 +74,7 @@ class ListItem extends StatelessWidget {
                     SizedBox(
                         //width: 200.0,
                         child: Text(
-                      type,
+                      " " + type,
                       style: TextStyle(fontSize: 17.0, color: Colors.grey),
                     )),
                   ],
@@ -81,63 +82,85 @@ class ListItem extends StatelessWidget {
               ),
             ],
           ),
-          Container(
-            decoration: BoxDecoration(
-                color: Colors.white, borderRadius: BorderRadius.circular(4.0)),
-            child: Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-              child: Row(
-                children: <Widget>[
-                  const Icon(
-                    Icons.format_list_numbered,
-                    size: 20.0,
+          Row(
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(4.0)),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 8.0, vertical: 4.0),
+                  child: Row(
+                    children: <Widget>[
+                      const Icon(
+                        Icons.format_list_numbered,
+                        size: 20.0,
+                        color: Colors.black,
+                      ),
+                      Text(quantity.toString(),
+                          style: const TextStyle(
+                            color: Colors.black,
+                            fontSize: 17.0,
+                          ))
+                    ],
+                  ),
+                ),
+              ),
+              InkWell(
+                onTap: () {
+                  //Deletefunktion här
+                  showDialog<String>(
+                    context: context,
+                    builder: (BuildContext context) => AlertDialog(
+                      title: const Text("Confirm"),
+                      content: const Text("Do you want to delete the item?"),
+                      actions: <Widget>[
+                        TextButton(
+                            onPressed: () async {
+                              ApiCalls function = ApiCalls();
+                              try {
+                                await function.removeItem(name);
+                              } catch (e) {
+                                //print('There is an exception.');
+                              }
+                              Navigator.pop(context, 'OK');
+                            },
+                            child: const Text('OK')),
+                        TextButton(
+                            onPressed: () => Navigator.pop(context, 'Cancel'),
+                            child: const Text('Cancel')),
+                      ],
+                    ),
+                  );
+                },
+                child: const Padding(
+                  padding: EdgeInsets.all(20.0),
+                  child: Icon(
+                    Icons.delete,
+                    size: 30.0,
                     color: Colors.black,
                   ),
-                  Text(quantity.toString(),
-                      style: const TextStyle(
-                        color: Colors.black,
-                        fontSize: 17.0,
-                      ))
-                ],
-              ),
-            ),
-          ),
-          InkWell(
-            onTap: () {
-              //Deletefunktion här
-              showDialog<String>(
-                context: context,
-                builder: (BuildContext context) => AlertDialog(
-                  title: const Text("Confirm"),
-                  content: const Text("Do you want to delete the item?"),
-                  actions: <Widget>[
-                    TextButton(
-                        onPressed: () async {
-                          ApiCalls function = ApiCalls();
-                          try {
-                            await function.removeItem(name);
-                          } catch (e) {
-                            //print('There is an exception.');
-                          }
-                          Navigator.pop(context, 'OK');
-                        },
-                        child: const Text('OK')),
-                    TextButton(
-                        onPressed: () => Navigator.pop(context, 'Cancel'),
-                        child: const Text('Cancel')),
-                  ],
                 ),
-              );
-            },
-            child: const Padding(
-              padding: EdgeInsets.all(20.0),
-              child: Icon(
-                Icons.delete,
-                size: 30.0,
-                color: Colors.black,
               ),
-            ),
+              InkWell(
+                onTap: () {
+                  //Deletefunktion här
+                  showDialog<String>(
+                      context: context,
+                      builder: (BuildContext context) =>
+                          DialogForm("Update item", 2));
+                },
+                child: const Padding(
+                  padding: EdgeInsets.all(20.0),
+                  child: Icon(
+                    Icons.update,
+                    size: 30.0,
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+            ],
           ),
         ]),
       ),

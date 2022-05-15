@@ -1,8 +1,10 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:login_app/LoginPage.dart';
 import 'package:login_app/apiCalls.dart';
+import 'package:login_app/dialogClass.dart';
 import 'package:login_app/item_api.dart';
 import 'package:login_app/listItem.dart';
 import 'package:login_app/signUpPage.dart';
@@ -54,27 +56,6 @@ class _TestPageState extends State<TestPage> {
         itemList = list.map((model) => Item.fromJson(model)).toList();
       });
     });
-  }
-
-  Future<void> updateItem(String name, String quantity, int type) async {
-    final response = await http.post(
-        Uri.parse('http://localhost:2022/updateItem'), //något liknande här
-        body: {"name": name, "quantity": quantity, "type": type});
-    if (response.statusCode == 201) {
-      showDialog<String>(
-        context: context,
-        builder: (BuildContext context) => AlertDialog(
-          title: const Text("Item updated"),
-          actions: <Widget>[
-            TextButton(
-                onPressed: () => Navigator.pop(context, 'OK'),
-                child: const Text('OK')),
-          ],
-        ),
-      );
-    } else {
-      throw Exception('Unexpected error occured!');
-    }
   }
 
   String setTypeString(int type) {
@@ -161,7 +142,22 @@ class _TestPageState extends State<TestPage> {
                       left: 40,
                     ),
                     child: InkWell(
-                      onTap: function.logout,
+                      onTap: () {
+                        try {
+                          if (function.logout == 200) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const SignInScreen()),
+                            );
+                          } else {
+                            print("Something went wrong" +
+                                function.logout.toString());
+                          }
+                        } catch (e) {
+                          //error
+                        }
+                      },
                       child: const Text(
                         "Logout",
                         style: TextStyle(fontSize: 20, color: Colors.grey),
@@ -277,41 +273,9 @@ class _TestPageState extends State<TestPage> {
                             child: ElevatedButton.icon(
                               onPressed: () async {
                                 showDialog<String>(
-                                  context: context,
-                                  builder: (BuildContext context) =>
-                                      AlertDialog(
-                                    title: const Text("Add new Item"),
-                                    actions: <Widget>[
-                                      /*
-                                      TextButton(
-                                          onPressed: () async {
-                                            ApiCalls function = ApiCalls();
-
-                                            try {
-                                              //apiResponse =
-                                              //await function.addItem("Kiwi",
-                                              //  170, 1, "yummy fruit");
-                                            } catch (e) {
-                                              //error
-                                            }
-                                            print(apiResponse);
-                                            Navigator.pop(context, 'OK');
-                                          },
-                                          child: const Text('OK')),
-                                          */
-                                      TextFormField(
-                                        controller: nameController,
-                                        decoration: const InputDecoration(
-                                          hintText: 'Type your username',
-                                          border: OutlineInputBorder(),
-                                          icon: Icon(
-                                            Icons.person,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                );
+                                    context: context,
+                                    builder: (BuildContext context) =>
+                                        DialogForm("Add Item", 1));
                                 //lägg till item funktion här
                               },
                               style: ButtonStyle(
