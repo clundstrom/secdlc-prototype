@@ -1,12 +1,12 @@
-class Data {
+class Item {
   final String name;
-  final int quantity;
-  final String type;
+  final String quantity;
+  final int type;
 
-  Data({required this.name, required this.quantity, required this.type});
+  Item({required this.name, required this.quantity, required this.type});
 
-  factory Data.fromJson(Map<String, dynamic> json) {
-    return Data(
+  factory Item.fromJson(Map<String, dynamic> json) {
+    return Item(
       name: json['name'],
       quantity: json['quantity'],
       type: json['type'],

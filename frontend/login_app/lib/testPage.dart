@@ -1,8 +1,11 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:login_app/LoginPage.dart';
+import 'package:login_app/apiCalls.dart';
+import 'package:login_app/dialogClass.dart';
+import 'package:login_app/item_api.dart';
 import 'package:login_app/listItem.dart';
 import 'package:login_app/signUpPage.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
@@ -21,104 +24,53 @@ class TestPage extends StatefulWidget {
 }
 
 class _TestPageState extends State<TestPage> {
-  late Future<List<Data>> futureData;
+  //late Future<List<Item>> futureData;
   String now = DateFormat("yyyy-MM-dd").format(DateTime.now());
-  String token = "";
+  String itemTypeString = "";
+  //List<Character> characterList = new List<Character>();
+  List<Item> itemList = <Item>[];
+  ApiCalls function = ApiCalls();
+  String apiResponse = "";
+  final nameController = TextEditingController();
+  final quantityController = TextEditingController();
+  final typeController = TextEditingController();
+  final descriptionController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    futureData = getInventory();
+    //futureData = getInventory();
+    getItemfromApi();
   }
 
-  Future<List<Data>> getInventory() async {
-    final response = await http
-        //.get(Uri.parse('http://localhost:2022/getInventory'));
-        .get(
-      Uri.parse('https://jsonplaceholder.typicode.com/albums'),
-      headers: {
-        HttpHeaders.contentTypeHeader: 'application/json',
-      },
-    );
-    if (response.statusCode == 200) {
-      List jsonResponse = json.decode(response.body);
-      return jsonResponse.map((data) => Data.fromJson(data)).toList();
-    } else {
-      throw Exception('Unexpected error occured!');
-    }
+  List<Item> parseUser(String responseBody) {
+    var list = json.decode(responseBody) as List<dynamic>;
+    var users = list.map((e) => Item.fromJson(e)).toList();
+    return users;
   }
 
-  Future<void> addItem(String name, int quantity, int type) async {
-    final response = await http
-        .post(Uri.parse('http://localhost:2022/addItem'), //något liknande här
-            body: {"name": name, "quantity": quantity, "type": type});
-    if (response.statusCode == 201) {
-      showDialog<String>(
-        context: context,
-        builder: (BuildContext context) => AlertDialog(
-          title: const Text("Item added"),
-          actions: <Widget>[
-            TextButton(
-                onPressed: () => Navigator.pop(context, 'OK'),
-                child: const Text('OK')),
-          ],
-        ),
-      );
-    } else {
-      throw Exception('Unexpected error occured!');
-    }
+  void getItemfromApi() async {
+    await ItemApi.getItems().then((response) {
+      setState(() {
+        Iterable list = json.decode(response.body);
+        itemList = list.map((model) => Item.fromJson(model)).toList();
+      });
+    });
   }
 
-  Future<void> updateItem(String name, int quantity, int type) async {
-    final response = await http.post(
-        Uri.parse('http://localhost:2022/updateItem'), //något liknande här
-        body: {"name": name, "quantity": quantity, "type": type});
-    if (response.statusCode == 201) {
-      showDialog<String>(
-        context: context,
-        builder: (BuildContext context) => AlertDialog(
-          title: const Text("Item updated"),
-          actions: <Widget>[
-            TextButton(
-                onPressed: () => Navigator.pop(context, 'OK'),
-                child: const Text('OK')),
-          ],
-        ),
-      );
-    } else {
-      throw Exception('Unexpected error occured!');
+  String setTypeString(int type) {
+    if (type == 1) {
+      return "Fruit";
+    } else if (type == 2) {
+      return "Meat";
+    } else if (type == 3) {
+      return "Cleaning";
+    } else if (type == 4) {
+      return "Snacks";
+    } else if (type == 5) {
+      return "Office";
     }
-  }
-
-  Future<void> removeItem(String name) async {
-    final response = await http.post(
-        Uri.parse('http://localhost:2022/removeItem'), //något liknande här
-        body: {"name": name});
-    if (response.statusCode == 200) {
-      showDialog<String>(
-        context: context,
-        builder: (BuildContext context) => AlertDialog(
-          title: const Text("Item removed"),
-          actions: <Widget>[
-            TextButton(
-                onPressed: () => Navigator.pop(context, 'OK'),
-                child: const Text('OK')),
-          ],
-        ),
-      );
-    } else {
-      throw Exception('Unexpected error occured!');
-    }
-  }
-
-  Future<void> logout() async {
-    final response = await http.post(
-      Uri.parse('http://localhost:2022/logout'), //något liknande här
-    );
-    if (response.statusCode == 200) {
-    } else {
-      throw Exception('Unexpected error occured!');
-    }
+    return "";
   }
 
   @override
@@ -139,8 +91,8 @@ class _TestPageState extends State<TestPage> {
               width: size.width * 0.2,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
-                  Padding(
+                children: [
+                  const Padding(
                     padding: EdgeInsets.only(
                       bottom: 0,
                       left: 40,
@@ -151,7 +103,7 @@ class _TestPageState extends State<TestPage> {
                       size: 100,
                     ),
                   ),
-                  Padding(
+                  const Padding(
                     padding: EdgeInsets.only(
                       top: 5,
                       left: 40,
@@ -164,7 +116,7 @@ class _TestPageState extends State<TestPage> {
                           color: Colors.white),
                     ),
                   ),
-                  Padding(
+                  const Padding(
                     padding: EdgeInsets.only(
                       top: 5,
                       left: 40,
@@ -174,7 +126,7 @@ class _TestPageState extends State<TestPage> {
                       style: TextStyle(fontSize: 20, color: Colors.grey),
                     ),
                   ),
-                  Padding(
+                  const Padding(
                     padding: EdgeInsets.only(
                       top: 100,
                       left: 40,
@@ -185,13 +137,36 @@ class _TestPageState extends State<TestPage> {
                     ),
                   ),
                   Padding(
-                    padding: EdgeInsets.only(
+                    padding: const EdgeInsets.only(
                       top: 40,
                       left: 40,
                     ),
-                    child: Text(
-                      'Log out',
-                      style: TextStyle(fontSize: 20, color: Colors.grey),
+                    child: InkWell(
+                      onTap: () {
+                        try {
+                          if (function.logout == 200) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const SignInScreen()),
+                            );
+                          } else {
+                            print("Something went wrong" +
+                                function.logout.toString());
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const SignInScreen()),
+                            );
+                          }
+                        } catch (e) {
+                          //error
+                        }
+                      },
+                      child: const Text(
+                        "Logout",
+                        style: TextStyle(fontSize: 20, color: Colors.grey),
+                      ),
                     ),
                   ),
                 ],
@@ -261,19 +236,31 @@ class _TestPageState extends State<TestPage> {
                             ),
                             height: size.height * 0.6,
                             width: size.width * 0.4,
-                            child: FutureBuilder<List<Data>>(
-                                future: futureData,
+                            child: ListView.builder(
+                                itemCount: itemList.length,
+                                itemBuilder: (context, index) {
+                                  return ListItem(
+                                    itemList[index].quantity,
+                                    itemList[index].name,
+                                    itemTypeString =
+                                        setTypeString(itemList[index].type),
+                                  );
+                                }),
+                            /*
+                            child: FutureBuilder<List<Item>>(
+                                future: itemList,
                                 builder: (context, snapshot) {
                                   if (snapshot.hasData) {
-                                    List<Data> data = snapshot.requireData;
+                                    List<Item> data = snapshot.requireData;
                                     return ListView.builder(
                                         itemCount: data.length,
                                         itemBuilder:
                                             (BuildContext context, int index) {
                                           return ListItem(
-                                            4, //data[index].quantity,
-                                            "Banan", //data[index].name,
-                                            "Frukt", //data[index].type,
+                                            data[index].quantity,
+                                            data[index].name,
+                                            itemTypeString =
+                                                setTypeString(data[index].type),
                                           );
                                         });
                                   } else if (snapshot.hasError) {
@@ -281,6 +268,7 @@ class _TestPageState extends State<TestPage> {
                                   }
                                   return const CircularProgressIndicator();
                                 }),
+                                */
                           ),
                           Padding(
                             padding: const EdgeInsets.only(
@@ -288,21 +276,13 @@ class _TestPageState extends State<TestPage> {
                               left: 80,
                             ),
                             child: ElevatedButton.icon(
-                              onPressed: () {
+                              onPressed: () async {
                                 showDialog<String>(
-                                  context: context,
-                                  builder: (BuildContext context) =>
-                                      AlertDialog(
-                                    title: const Text("Item added"),
-                                    actions: <Widget>[
-                                      TextButton(
-                                          onPressed: () =>
-                                              Navigator.pop(context, 'OK'),
-                                          child: const Text('OK')),
-                                    ],
-                                  ),
-                                );
-                                //lägg till item funktion här
+                                    context: context,
+                                    builder: (BuildContext context) =>
+                                        DialogForm("Add Item", 1));
+
+                                //getItemfromApi();
                               },
                               style: ButtonStyle(
                                 backgroundColor:
