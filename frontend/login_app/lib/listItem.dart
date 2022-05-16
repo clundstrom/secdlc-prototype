@@ -25,6 +25,39 @@ class ListItem extends StatelessWidget {
         body: {"name": name});
   }
 
+  Widget getIcon() {
+    if (type == "Fruit") {
+      return const Icon(
+        Icons.apple,
+        color: Colors.white,
+      );
+    } else if (type == "Meat") {
+      return const Icon(
+        Icons.room_service,
+        color: Colors.white,
+      );
+    } else if (type == "Cleaning") {
+      return const Icon(
+        Icons.dry_cleaning,
+        color: Colors.white,
+      );
+    } else if (type == "Snacks") {
+      return const Icon(
+        Icons.no_food,
+        color: Colors.white,
+      );
+    } else if (type == "Office") {
+      return const Icon(
+        Icons.desktop_windows,
+        color: Colors.white,
+      );
+    }
+    return const Icon(
+      Icons.shopping_cart,
+      color: Colors.white,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -53,10 +86,7 @@ class ListItem extends StatelessWidget {
                   ),
                   height: 80.0,
                   width: 80.0,
-                  child: const Icon(
-                    Icons.shopping_cart,
-                    color: Colors.white,
-                  ),
+                  child: getIcon(),
                 ),
               ),
               Container(
@@ -124,6 +154,7 @@ class ListItem extends StatelessWidget {
                               } catch (e) {
                                 //print('There is an exception.');
                               }
+
                               Navigator.pop(context, 'OK');
                             },
                             child: const Text('OK')),

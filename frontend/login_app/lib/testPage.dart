@@ -50,7 +50,7 @@ class _TestPageState extends State<TestPage> {
   }
 
   void getItemfromApi() async {
-    ItemApi.getItems().then((response) {
+    await ItemApi.getItems().then((response) {
       setState(() {
         Iterable list = json.decode(response.body);
         itemList = list.map((model) => Item.fromJson(model)).toList();
@@ -153,6 +153,11 @@ class _TestPageState extends State<TestPage> {
                           } else {
                             print("Something went wrong" +
                                 function.logout.toString());
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const SignInScreen()),
+                            );
                           }
                         } catch (e) {
                           //error
@@ -276,7 +281,8 @@ class _TestPageState extends State<TestPage> {
                                     context: context,
                                     builder: (BuildContext context) =>
                                         DialogForm("Add Item", 1));
-                                //lägg till item funktion här
+
+                                //getItemfromApi();
                               },
                               style: ButtonStyle(
                                 backgroundColor:

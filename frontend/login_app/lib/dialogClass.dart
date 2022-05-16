@@ -4,8 +4,8 @@ import 'package:login_app/apiCalls.dart';
 
 class DialogForm extends StatelessWidget {
   final nameController = TextEditingController();
-  final quantityController = TextEditingController();
-  final typeController = TextEditingController();
+  final quantityOrNameController = TextEditingController();
+  final typeOrNewQController = TextEditingController();
   final descriptionController = TextEditingController();
   String apiResponse = "";
 
@@ -13,6 +13,70 @@ class DialogForm extends StatelessWidget {
   final int functionType;
 
   DialogForm(this.title, this.functionType);
+
+  Widget getFieldTwo() {
+    if (functionType == 1) {
+      return Padding(
+        padding: EdgeInsets.all(5.0),
+        child: TextFormField(
+          controller: quantityOrNameController,
+          keyboardType: TextInputType.number,
+          inputFormatters: <TextInputFormatter>[
+            FilteringTextInputFormatter.digitsOnly
+          ],
+          decoration: const InputDecoration(
+            hintText: 'Item Quantity',
+            border: OutlineInputBorder(),
+          ),
+        ),
+      );
+    } else {
+      return Padding(
+        padding: EdgeInsets.all(5.0),
+        child: TextFormField(
+          controller: quantityOrNameController,
+          decoration: const InputDecoration(
+            hintText: 'New name',
+            border: OutlineInputBorder(),
+          ),
+        ),
+      );
+    }
+  }
+
+  Widget getFieldThree() {
+    if (functionType == 1) {
+      return Padding(
+        padding: EdgeInsets.all(5.0),
+        child: TextFormField(
+          controller: typeOrNewQController,
+          keyboardType: TextInputType.number,
+          inputFormatters: <TextInputFormatter>[
+            FilteringTextInputFormatter.digitsOnly
+          ],
+          decoration: const InputDecoration(
+            hintText: 'Item Type',
+            border: OutlineInputBorder(),
+          ),
+        ),
+      );
+    } else {
+      return Padding(
+        padding: EdgeInsets.all(5.0),
+        child: TextFormField(
+          controller: typeOrNewQController,
+          keyboardType: TextInputType.number,
+          inputFormatters: <TextInputFormatter>[
+            FilteringTextInputFormatter.digitsOnly
+          ],
+          decoration: const InputDecoration(
+            hintText: 'New Quantity',
+            border: OutlineInputBorder(),
+          ),
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,30 +101,8 @@ class DialogForm extends StatelessWidget {
             ),
           ),
         ),
-        Padding(
-          padding: EdgeInsets.all(5.0),
-          child: TextFormField(
-            controller: quantityController,
-            keyboardType: TextInputType.number,
-            inputFormatters: <TextInputFormatter>[
-              FilteringTextInputFormatter.digitsOnly
-            ],
-            decoration: const InputDecoration(
-              hintText: 'Item Quantity',
-              border: OutlineInputBorder(),
-            ),
-          ),
-        ),
-        Padding(
-          padding: EdgeInsets.all(5.0),
-          child: TextFormField(
-            controller: typeController,
-            decoration: const InputDecoration(
-              hintText: 'Item Type',
-              border: OutlineInputBorder(),
-            ),
-          ),
-        ),
+        getFieldTwo(),
+        getFieldThree(),
         Padding(
           padding: EdgeInsets.all(5.0),
           child: TextFormField(
@@ -86,14 +128,14 @@ class DialogForm extends StatelessWidget {
                   if (functionType == 1) {
                     apiResponse = await function.addItem(
                         nameController.text,
-                        int.parse(quantityController.text),
-                        int.parse(typeController.text),
+                        int.parse(quantityOrNameController.text),
+                        int.parse(typeOrNewQController.text),
                         descriptionController.text);
                   } else {
                     apiResponse = await function.updateItem(
                         nameController.text,
-                        int.parse(quantityController.text),
-                        int.parse(typeController.text),
+                        quantityOrNameController.text,
+                        int.parse(typeOrNewQController.text),
                         descriptionController.text);
                   }
                 } catch (e) {
