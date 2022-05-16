@@ -75,7 +75,7 @@ app.post('/createUser', (req, res) => {
 });
 
 app.get('/getInventory', (req, res) => {
-    //console.log(req.cookies)
+    console.log("Getting inventory")
     lib.getToken(req, res, (token) => {
         lib.verifyToken(token, res, (result) => {
             pool.getConnection()
@@ -87,11 +87,13 @@ app.get('/getInventory', (req, res) => {
                 }
                 conn.query(query)
                     .then((rows) => {
-                        res.status(200).json(rows).send()
+                        console.log("Query done")
+                        res.status(200).json(rows);
                         conn.end();
                     })
             }).catch(error => {
                 //not connected
+                console.log("Error has happend", error)
                 res.status(401).send(error)
         })
     })});

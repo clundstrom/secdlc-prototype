@@ -8,8 +8,9 @@ function generateToken(payload){
 
 function getToken(req, res, callback) {
   var token;
-  if(req.cookies && req.cookies.webToken){
+  if(req.cookies !== undefined && req.cookies.webToken !== undefined){
     token = req.cookies.webToken
+    console.log(token)
   } else {
     console.log(new Date(), ": No token in cookies")
     return res.status(400).send("No token in HttpOnly webToken cookie")
