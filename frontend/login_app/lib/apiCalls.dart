@@ -66,12 +66,12 @@ class ApiCalls {
   }
 
   Future<String> updateItem(String name, String new_name, int new_quantity,
-      String new_Description) async {
+      String new_description) async {
     Map data = {
       "name": name,
       "new_name": new_name,
       "new_quantity": new_quantity,
-      "new_description": new_Description
+      "new_description": new_description
     };
     var body = json.encode(data);
 

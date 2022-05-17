@@ -24,7 +24,7 @@ class TestPage extends StatefulWidget {
 }
 
 class _TestPageState extends State<TestPage> {
-  late Future<List<Item>> futureData;
+  //late Future<List<Item>> futureData;
   String now = DateFormat("yyyy-MM-dd").format(DateTime.now());
   String itemTypeString = "";
   //List<Character> characterList = new List<Character>();
@@ -35,6 +35,17 @@ class _TestPageState extends State<TestPage> {
   final quantityController = TextEditingController();
   final typeController = TextEditingController();
   final descriptionController = TextEditingController();
+  int fruitQuantity = 0;
+  int meatQuantity = 0;
+  int cleaningQuantity = 0;
+  int snacksQuantity = 0;
+  int officeQuantity = 0;
+  int totalQuantity = 0;
+  List<int> fruitList = <int>[];
+  List<int> meatList = <int>[];
+  List<int> snackList = <int>[];
+  List<int> cleaningList = <int>[];
+  List<int> officeList = <int>[];
 
   @override
   void initState() {
@@ -43,28 +54,82 @@ class _TestPageState extends State<TestPage> {
     //futureData = fetchData();
   }
 
-  Future<List<Item>> fetchData() async {
-    final response =
-        await http.get(Uri.parse('http://localhost:2022/getInventory'));
-    if (response.statusCode == 200) {
-      List jsonResponse = json.decode(response.body);
-      return jsonResponse.map((data) => Item.fromJson(data)).toList();
-    } else {
-      throw Exception('Unexpected error occured!');
-    }
-  }
-
   List<Item> parseUser(String responseBody) {
     var list = json.decode(responseBody) as List<dynamic>;
     var users = list.map((e) => Item.fromJson(e)).toList();
     return users;
   }
 
+  void addSumms() {
+    int temp = 0;
+    var newList = fruitList + meatList + snackList + cleaningList + officeList;
+    for (var element in newList) {
+      temp = temp + element;
+    }
+  }
+
   void getItemfromApi() async {
     await ItemApi.getItems().then((response) {
       setState(() {
+        fruitQuantity = 0;
+        meatQuantity = 0;
+        cleaningQuantity = 0;
+        snacksQuantity = 0;
+        officeQuantity = 0;
+        totalQuantity = 0;
         Iterable list = json.decode(response.body);
         itemList = list.map((model) => Item.fromJson(model)).toList();
+
+        for (var element in itemList) {
+          switch (element.type) {
+            case 1:
+              {
+                fruitQuantity = int.parse(element.quantity) + fruitQuantity;
+                totalQuantity = int.parse(element.quantity) + totalQuantity;
+                fruitList.add(int.parse(element.quantity));
+              }
+              break;
+
+            case 2:
+              {
+                meatQuantity = int.parse(element.quantity) + meatQuantity;
+                totalQuantity = int.parse(element.quantity) + totalQuantity;
+                meatList.add(int.parse(element.quantity));
+              }
+              break;
+
+            case 3:
+              {
+                cleaningQuantity =
+                    int.parse(element.quantity) + cleaningQuantity;
+                totalQuantity = int.parse(element.quantity) + totalQuantity;
+                cleaningList.add(int.parse(element.quantity));
+              }
+              break;
+
+            case 4:
+              {
+                snacksQuantity = int.parse(element.quantity) + snacksQuantity;
+                totalQuantity = int.parse(element.quantity) + totalQuantity;
+                snackList.add(int.parse(element.quantity));
+              }
+              break;
+
+            case 5:
+              {
+                officeQuantity = int.parse(element.quantity) + officeQuantity;
+                totalQuantity = int.parse(element.quantity) + totalQuantity;
+                officeList.add(int.parse(element.quantity));
+              }
+              break;
+
+            default:
+              {
+                print("Invalid type");
+              }
+              break;
+          }
+        }
       });
     });
   }
@@ -251,7 +316,7 @@ class _TestPageState extends State<TestPage> {
                                 itemCount: itemList.length,
                                 itemBuilder: (context, index) {
                                   return ListItem(
-                                    itemList[index].quantity,
+                                    int.parse(itemList[index].quantity),
                                     itemList[index].name,
                                     itemTypeString =
                                         setTypeString(itemList[index].type),
@@ -290,9 +355,9 @@ class _TestPageState extends State<TestPage> {
                                         ),
                                       );
                                     },
-                                    () {
+                                    () async {
                                       //Deletefunktion här
-                                      showDialog<String>(
+                                      await showDialog<String>(
                                           context: context,
                                           builder: (BuildContext context) =>
                                               DialogForm("Update item", 2));
@@ -383,9 +448,9 @@ class _TestPageState extends State<TestPage> {
                               ),
                             ),
                           ),
-                          const Padding(
+                          Padding(
                             padding: EdgeInsets.only(left: 25, top: 40),
-                            child: Text("Fruit: " "amount"),
+                            child: Text("Fruit: " + fruitQuantity.toString()),
                           ),
                           Padding(
                             padding: const EdgeInsets.only(left: 15.0),
@@ -394,15 +459,15 @@ class _TestPageState extends State<TestPage> {
                               animation: true,
                               lineHeight: 10.0,
                               animationDuration: 2000,
-                              percent: 0.9,
+                              percent: fruitQuantity.toDouble() / totalQuantity,
                               //center: const Text("90.0%"),
                               barRadius: const Radius.circular(16),
                               progressColor: Colors.green,
                             ),
                           ),
-                          const Padding(
+                          Padding(
                             padding: EdgeInsets.only(left: 25, top: 40),
-                            child: Text("Meat: " "amount"),
+                            child: Text("Meat: " + meatQuantity.toString()),
                           ),
                           Padding(
                             padding: const EdgeInsets.only(left: 15.0),
@@ -411,15 +476,16 @@ class _TestPageState extends State<TestPage> {
                               animation: true,
                               lineHeight: 10.0,
                               animationDuration: 2500,
-                              percent: 0.1,
+                              percent: meatQuantity.toDouble() / totalQuantity,
                               //center: const Text("80.0%"),
                               barRadius: const Radius.circular(16),
                               progressColor: Colors.green,
                             ),
                           ),
-                          const Padding(
+                          Padding(
                             padding: EdgeInsets.only(left: 25, top: 40),
-                            child: Text("Cleaning: " "amount"),
+                            child: Text(
+                                "Cleaning: " + cleaningQuantity.toString()),
                           ),
                           Padding(
                             padding: const EdgeInsets.only(left: 15.0),
@@ -428,15 +494,16 @@ class _TestPageState extends State<TestPage> {
                               animation: true,
                               lineHeight: 10.0,
                               animationDuration: 2500,
-                              percent: 0.7,
+                              percent:
+                                  cleaningQuantity.toDouble() / totalQuantity,
                               //center: const Text("80.0%"),
                               barRadius: const Radius.circular(16),
                               progressColor: Colors.green,
                             ),
                           ),
-                          const Padding(
+                          Padding(
                             padding: EdgeInsets.only(left: 25, top: 40),
-                            child: Text("Snacks: " "amount"),
+                            child: Text("Snacks: " + snacksQuantity.toString()),
                           ),
                           Padding(
                             padding: const EdgeInsets.only(left: 15.0),
@@ -445,15 +512,16 @@ class _TestPageState extends State<TestPage> {
                               animation: true,
                               lineHeight: 10.0,
                               animationDuration: 2500,
-                              percent: 0.3,
+                              percent:
+                                  snacksQuantity.toDouble() / totalQuantity,
                               //center: const Text("80.0%"),
                               barRadius: const Radius.circular(16),
                               progressColor: Colors.green,
                             ),
                           ),
-                          const Padding(
+                          Padding(
                             padding: EdgeInsets.only(left: 25, top: 40),
-                            child: Text("Office: " "amount"),
+                            child: Text("Office: " + officeQuantity.toString()),
                           ),
                           Padding(
                             padding:
@@ -463,7 +531,8 @@ class _TestPageState extends State<TestPage> {
                               animation: true,
                               lineHeight: 10.0,
                               animationDuration: 2500,
-                              percent: 0.5,
+                              percent:
+                                  officeQuantity.toDouble() / totalQuantity,
                               //center: const Text("80.0%"),
                               barRadius: const Radius.circular(16),
                               progressColor: Colors.green,

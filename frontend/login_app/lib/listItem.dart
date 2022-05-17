@@ -7,7 +7,7 @@ import 'package:login_app/testPage.dart';
 
 class ListItem extends StatelessWidget {
   static const colorDarkRed = Color(0xffb66a6b);
-  final String quantity;
+  final int quantity;
   final String name;
   final String type;
   final VoidCallback onTapDelete;
