@@ -67,7 +67,12 @@ app.post('/login', (req, res) => {
 });
 
 app.post('/logout', (req, res) => {
-    res.status(200).send('You are now logged out');
+    res.cookie("webToken", "", {
+        secure: false,
+        httpOnly: true,
+        expires: dayjs().add(-5, "minutes").toDate(),
+      }).status(200).send("Logout successful")
+    //res.status(200).send('You are now logged out');
 });
 
 app.post('/createUser', (req, res) => {
