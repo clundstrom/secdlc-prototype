@@ -10,20 +10,11 @@ class ListItem extends StatelessWidget {
   final String quantity;
   final String name;
   final String type;
+  final VoidCallback onTapDelete;
+  final VoidCallback onTapUpdate;
 
-  ListItem(this.quantity, this.name, this.type);
-
-  void removeItem() async {
-    http.post(
-        Uri.parse('http://localhost:2022/removeItem'), //något liknande här
-        body: {"name": name});
-  }
-
-  void updateItem() async {
-    http.post(
-        Uri.parse('http://localhost:2022/updateItem'), //något liknande här
-        body: {"name": name});
-  }
+  ListItem(
+      this.quantity, this.name, this.type, this.onTapDelete, this.onTapUpdate);
 
   Widget getIcon() {
     if (type == "Fruit") {
@@ -138,6 +129,7 @@ class ListItem extends StatelessWidget {
                 ),
               ),
               InkWell(
+                /*
                 onTap: () {
                   //Deletefunktion här
                   showDialog<String>(
@@ -165,6 +157,8 @@ class ListItem extends StatelessWidget {
                     ),
                   );
                 },
+                */
+                onTap: onTapDelete,
                 child: const Padding(
                   padding: EdgeInsets.all(20.0),
                   child: Icon(
@@ -175,13 +169,7 @@ class ListItem extends StatelessWidget {
                 ),
               ),
               InkWell(
-                onTap: () {
-                  //Deletefunktion här
-                  showDialog<String>(
-                      context: context,
-                      builder: (BuildContext context) =>
-                          DialogForm("Update item", 2));
-                },
+                onTap: onTapUpdate,
                 child: const Padding(
                   padding: EdgeInsets.all(20.0),
                   child: Icon(

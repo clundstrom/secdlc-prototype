@@ -24,7 +24,7 @@ class TestPage extends StatefulWidget {
 }
 
 class _TestPageState extends State<TestPage> {
-  //late Future<List<Item>> futureData;
+  late Future<List<Item>> futureData;
   String now = DateFormat("yyyy-MM-dd").format(DateTime.now());
   String itemTypeString = "";
   //List<Character> characterList = new List<Character>();
@@ -39,8 +39,19 @@ class _TestPageState extends State<TestPage> {
   @override
   void initState() {
     super.initState();
-    //futureData = getInventory();
     getItemfromApi();
+    //futureData = fetchData();
+  }
+
+  Future<List<Item>> fetchData() async {
+    final response =
+        await http.get(Uri.parse('http://localhost:2022/getInventory'));
+    if (response.statusCode == 200) {
+      List jsonResponse = json.decode(response.body);
+      return jsonResponse.map((data) => Item.fromJson(data)).toList();
+    } else {
+      throw Exception('Unexpected error occured!');
+    }
   }
 
   List<Item> parseUser(String responseBody) {
@@ -244,11 +255,58 @@ class _TestPageState extends State<TestPage> {
                                     itemList[index].name,
                                     itemTypeString =
                                         setTypeString(itemList[index].type),
+                                    () {
+                                      //Deletefunktion här
+                                      showDialog<String>(
+                                        context: context,
+                                        builder: (BuildContext context) =>
+                                            AlertDialog(
+                                          title: const Text("Confirm"),
+                                          content: const Text(
+                                              "Do you want to delete the item?"),
+                                          actions: <Widget>[
+                                            TextButton(
+                                                onPressed: () async {
+                                                  ApiCalls function =
+                                                      ApiCalls();
+                                                  try {
+                                                    await function.removeItem(
+                                                      itemList[index].name,
+                                                    );
+                                                  } catch (e) {
+                                                    //print('There is an exception.');
+                                                  }
+                                                  setState(() {
+                                                    getItemfromApi();
+                                                  });
+                                                  Navigator.pop(context, 'OK');
+                                                },
+                                                child: const Text('OK')),
+                                            TextButton(
+                                                onPressed: () => Navigator.pop(
+                                                    context, 'Cancel'),
+                                                child: const Text('Cancel')),
+                                          ],
+                                        ),
+                                      );
+                                    },
+                                    () {
+                                      //Deletefunktion här
+                                      showDialog<String>(
+                                          context: context,
+                                          builder: (BuildContext context) =>
+                                              DialogForm("Update item", 2));
+
+                                      setState(() {
+                                        getItemfromApi();
+                                      });
+                                    },
                                   );
                                 }),
+
                             /*
                             child: FutureBuilder<List<Item>>(
-                                future: itemList,
+                                future: futureData,
                                 builder: (context, snapshot) {
                                   if (snapshot.hasData) {
                                     List<Item> data = snapshot.requireData;
@@ -257,10 +315,11 @@ class _TestPageState extends State<TestPage> {
                                         itemBuilder:
                                             (BuildContext context, int index) {
                                           return ListItem(
-                                            data[index].quantity,
-                                            data[index].name,
-                                            itemTypeString =
-                                                setTypeString(data[index].type),
+                                            quantity: itemList[index].quantity,
+                                            name: itemList[index].name,
+                                            type: itemTypeString =
+                                                setTypeString(
+                                                    itemList[index].type),
                                           );
                                         });
                                   } else if (snapshot.hasError) {
@@ -277,12 +336,14 @@ class _TestPageState extends State<TestPage> {
                             ),
                             child: ElevatedButton.icon(
                               onPressed: () async {
-                                showDialog<String>(
+                                await showDialog<String>(
                                     context: context,
                                     builder: (BuildContext context) =>
                                         DialogForm("Add Item", 1));
 
-                                //getItemfromApi();
+                                setState(() {
+                                  getItemfromApi();
+                                });
                               },
                               style: ButtonStyle(
                                 backgroundColor:
