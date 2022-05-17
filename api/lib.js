@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken')
 const dayjs = require('dayjs');
 function generateToken(payload){
   var priv = Buffer.from(process.env.PRIV, 'base64').toString('ascii')
-  return jwt.sign(payload, priv, { algorithm: 'RS256', expiresIn: "1min"})
+  //return jwt.sign(payload, priv, { algorithm: 'RS256', expiresIn: "1min"})
   return jwt.sign(payload, priv, { algorithm: 'RS256', expiresIn: process.env.TOKEN_DURATION_MIN + "min"})
 }
 
@@ -30,13 +30,13 @@ function verifyToken(payload, callback){
     console.log(new Date(), ": ", err.name, err.message)
   }
   if(callback){
-    callback(result)
+    callback(result, error)
   } else {
     return {"result": result, "err": error};
   }
 }
 
-function verificationSteps(req, schema){
+function verificationSteps(req, schema, sessions){
   var {result, err} = verifySchema(req.body,schema)
   if(!result){
       console.log(new Date(), ": ", JSON.stringify(err));
@@ -49,6 +49,11 @@ function verificationSteps(req, schema){
   var {result, error} = verifyToken(token);
   if(!result){
     return {"result": false, "code": 401, "err": error}
+  }
+  //If token is legit but is not in registry, add it
+  var isTokenIn = sessions.isTokenInRegistry(token)
+  if(!isTokenIn){
+    sessions.addToken(token, result)
   }
   return {"result": result, "code": 200, "err": ""}
 }

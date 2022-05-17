@@ -31,7 +31,6 @@ app.post('/login', (req, res) => {
         console.log(new Date(), ": ", JSON.stringify(err));
         return res.status(400).send("Invalid post parameters");
     }
-
     pool.getConnection()
     .then(conn => {
         conn.query(`SELECT hash, access FROM users WHERE name = ?`, [username])
@@ -45,9 +44,9 @@ app.post('/login', (req, res) => {
                 let access = rows[0].access
                 bcrypt.compare(password, hash, (error, result) => {
                     if (result) {
-                        if(req.cookies !== undefined && req.cookies.webToken !== undefined){
-                            //token = req.cookies.webToken
-                            lib.verifyToken()
+                        var old_token = lib.getToken(req);
+                        if(old_token){
+                            Sessions.removeToken(old_token)
                         }
                         let token = lib.generateToken({ user: username, access: access })
                         console.log("Generated token: ", token)
@@ -56,8 +55,8 @@ app.post('/login', (req, res) => {
                             httpOnly: true,
                             expires: dayjs().add(process.env.TOKEN_DURATION_MIN, "minutes").toDate(),
                             }).status(200).send("Login successful")
-                        var sessions = require('./sessions.js').Sessions();
-                        sessions.addToken(token, { user: username, access: access })
+                        Sessions.addToken(token, { user: username, access: access })
+
                     } else {
                         res.status(403).send("Invalid credentials")
                     }
@@ -75,18 +74,12 @@ app.post('/logout', (req, res) => {
     if(!token){
         return res.status(400).send("You are not logged in")
     }
-    var result = lib.verifyToken(token);
-    if(!result){
-        return res.status(400).send("Invalid web token")
-    }
     let msg = Sessions.removeToken(token)
-    res.status(200).send(msg)
-    // res.cookie("webToken", "", {
-    //     secure: false,
-    //     httpOnly: true,
-    //     expires: dayjs().add(-5, "minutes").toDate(),
-    //   }).status(200).send("Logout successful")
-    
+    res.cookie("webToken", "", {
+        secure: false,
+        httpOnly: true,
+        expires: dayjs().add(-5, "minutes").toDate(),
+      }).status(200).send(msg)
 });
 
 app.post('/createUser', (req, res) => {
@@ -102,7 +95,10 @@ app.get('/getInventory', (req, res) => {
     if(!result){
         return res.status(401).send(err)
     }
-
+    var isTokenIn = Sessions.isTokenInRegistry(token)
+    if(!isTokenIn){
+        Sessions.addToken(token, result)
+    }
     pool.getConnection()
         .then(conn => {
             let access = result.access;
@@ -122,7 +118,7 @@ app.get('/getInventory', (req, res) => {
 });
 
 app.post('/addItem', (req, res) => {
-    var {result, code, err} = lib.verificationSteps(req, SCHEMAS.addItemSchema)
+    var {result, code, err} = lib.verificationSteps(req, SCHEMAS.addItemSchema, Sessions)
     console.log(result, code, err)
     if(!result){
         return res.status(code).send(err)
@@ -156,7 +152,7 @@ app.post('/addItem', (req, res) => {
 });
 
 app.post('/removeItem', (req, res) => {
-    var {result, code, err} = lib.verificationSteps(req, SCHEMAS.removeItemSchema)
+    var {result, code, err} = lib.verificationSteps(req, SCHEMAS.removeItemSchema, Sessions)
     if(!result){
         return res.status(code).send(err)
     }
@@ -188,7 +184,7 @@ app.post('/removeItem', (req, res) => {
 });
 
 app.post('/updateitem', (req, res) => {
-    var {result, code, err} = lib.verificationSteps(req, SCHEMAS.updateItemSchema)
+    var {result, code, err} = lib.verificationSteps(req, SCHEMAS.updateItemSchema, Sessions)
     if(!result){
         return res.status(code).send(err)
     }
@@ -223,7 +219,11 @@ app.post('/updateitem', (req, res) => {
             res.status(401).send(error)
         })
 });
-
+function clearOld(sessions){
+    Sessions.clearExpired()
+    setTimeout(clearOld, 60*60*3*1000, sessions)
+}
 app.listen(port, host, () => {
     console.log('Server started');
+    setTimeout(clearOld, 60*60*3*1000, Sessions)
 });

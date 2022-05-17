@@ -1,17 +1,16 @@
+const dayjs = require('dayjs');
 
 var Sessions = function(){
     var DB = require('./sessionsDB.json')
+    const jwt = require('jsonwebtoken')
     const fs = require('fs');
 
     this.printDB = function(){
         console.log(DB)
     }
 
-    this.addToken = function(token, userdata){
-       
+    this.addToken = function(token, userdata){   
         DB[token] = userdata
-        console.log("added token")
-        console.log(DB)
     }
 
     this.removeToken = function(token){
@@ -23,8 +22,25 @@ var Sessions = function(){
         }
     }
 
-    this.verifyJwtSession = function(token, userdata){
-        
+    this.clearExpired = function(){
+        const keys = Object.keys(DB);
+        keys.forEach((key, index) => {
+            let res = jwt.decode(key)
+            let now = new Date().getTime()/1000
+            if(res.exp < now){
+                delete DB[key]
+            }
+        });
+        console.log(new Date(), ": Cleared expired tokens")
+    }
+
+    this.isTokenInRegistry = function(token){
+        if(DB[token]){
+            return true
+        }
+        else {
+            return false
+        }
     }
 
     this.saveDB = function(){
