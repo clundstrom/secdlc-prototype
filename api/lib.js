@@ -53,9 +53,8 @@ function verificationSteps(req, schema, sessions){
   //If token is legit but is not in registry, add it
   var isTokenIn = sessions.isTokenInRegistry(token)
   if(!isTokenIn){
-    sessions.addToken(token, result)
+    return {"result": false, "code": 401, "err": "Your token is invalid/expired"}
   }
-  return {"result": result, "code": 200, "err": ""}
 }
 
 function verifySchema(payload, schema, callback) {

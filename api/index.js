@@ -80,6 +80,7 @@ app.post('/logout', (req, res) => {
         httpOnly: true,
         expires: dayjs().add(-5, "minutes").toDate(),
       }).status(200).send(msg)
+    //res.status(200).send(msg)
 });
 
 app.post('/createUser', (req, res) => {
@@ -97,7 +98,7 @@ app.get('/getInventory', (req, res) => {
     }
     var isTokenIn = Sessions.isTokenInRegistry(token)
     if(!isTokenIn){
-        Sessions.addToken(token, result)
+        return res.status(401).send("Your token is invalid/expired")
     }
     pool.getConnection()
         .then(conn => {
