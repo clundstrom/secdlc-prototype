@@ -50,11 +50,12 @@ app.post('/login', (req, res) => {
                         }
                         let token = lib.generateToken({ user: username, access: access })
                         console.log("Generated token: ", token)
+                        res.setHeader('Access-Control-Allow-Origin', 'http://localhost:4200');
                         res.cookie("webToken", token, {
                             secure: false,
                             httpOnly: true,
                             expires: dayjs().add(process.env.TOKEN_DURATION_MIN, "minutes").toDate(),
-                            }).status(200).send("Login successful")
+                            }).status(200).json({"data": token})
                         Sessions.addToken(token, { user: username, access: access })
 
                     } else {
