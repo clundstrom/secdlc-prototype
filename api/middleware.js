@@ -22,7 +22,7 @@ var setPossibleRequests = (req, res, next) => {
 var setCorsHeader = (req, res, next) => {
     // NOTE: Exclude TRACE and TRACK methods to avoid XST attacks.
     res.setHeader('Access-Control-Allow-Origin', 'http://localhost:4200');
-    
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-requested-with');
     next();
 };
 
